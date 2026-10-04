@@ -3,6 +3,7 @@ import Navbar from "./components/Navbar/Navbar";
 import Home from "./components/Home/Home";
 import Internships from "./components/Internships/Internships";
 import Hackathons from "./components/Hackathons/Hackathons";
+import Verify from "./components/Verify/Verify";
 
 function App() {
   return (
@@ -16,9 +17,7 @@ function App() {
 
         <Hackathons />
 
-        <section id="verify">
-          <h1>Verify</h1>
-        </section>
+        <Verify />
 
         <section id="about">
           <h1>About</h1>
