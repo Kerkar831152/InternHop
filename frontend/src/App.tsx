@@ -1,6 +1,8 @@
 import './App.css'
 import Navbar from "./components/Navbar/Navbar";
 import Home from "./components/Home/Home";
+import Internships from "./components/Internships/Internships";
+
 function App() {
   return (
     <>
@@ -9,9 +11,7 @@ function App() {
       <main>
         <Home />
 
-        <section id="internships">
-          <h1>Internships</h1>
-        </section>
+        <Internships />
 
         <section id="hackathons">
           <h1>Hackathons</h1>
