@@ -2,41 +2,87 @@ import type { Internship } from "../types/internships";
 
 type OpportunityCardProps = {
   internship: Internship;
+  isSaved: boolean;
+  onToggleSave: (id: number) => void;
 };
 
-function OpportunityCard({ internship }: OpportunityCardProps) {
+function OpportunityCard({
+  internship,
+  isSaved,
+  onToggleSave,
+}: OpportunityCardProps) {
   return (
     <article className="opportunity-card">
       <div className="card-top">
-        <div>
-          <p className="company">{internship.company}</p>
-          <h3>{internship.title}</h3>
+        <div className="company-logo">
+          {internship.company.charAt(0).toUpperCase()}
         </div>
 
-        {internship.verified && (
-          <span className="verified">✓ Verified</span>
-        )}
+        <div className="company-info">
+          <div className="company-name">
+            {internship.company}
+            <span className="verified">✓</span>
+          </div>
+
+          <p>Verified opportunity</p>
+        </div>
+
+        <button
+          className={`save-btn ${isSaved ? "saved" : ""}`}
+          onClick={() => onToggleSave(internship.id)}
+          aria-label={
+            isSaved
+              ? "Remove from saved"
+              : "Save opportunity"
+          }
+        >
+          {isSaved ? "♥" : "♡"}
+        </button>
       </div>
 
-      <p className="description">{internship.description}</p>
+      <div className="card-main">
+        <h3>{internship.title}</h3>
 
-      <div className="skills">
-        {internship.skills.map((skill) => (
-          <span key={skill}>{skill}</span>
-        ))}
-      </div>
+        <p className="card-description">
+          {internship.description}
+        </p>
 
-      <div className="card-info">
-        <span>📍 {internship.location}</span>
-        <span>💰 {internship.stipend}</span>
+        <div className="card-details">
+          <span>⌖ {internship.location}</span>
+          <span>◷ {internship.internshipType}</span>
+        </div>
+
+        <div className="skills">
+          {internship.skills.slice(0, 4).map((skill) => (
+            <span className="skill-tag" key={skill}>
+              {skill}
+            </span>
+          ))}
+
+          {internship.skills.length > 4 && (
+            <span className="skill-more">
+              +{internship.skills.length - 4}
+            </span>
+          )}
+        </div>
       </div>
 
       <div className="card-bottom">
-        <span className="deadline">
-          Deadline: {internship.deadline}
-        </span>
+        <div className="opportunity-meta">
+          <div>
+            <span>Stipend</span>
+            <strong>{internship.stipend}</strong>
+          </div>
 
-        <button>View Details →</button>
+          <div>
+            <span>Deadline</span>
+            <strong>{internship.deadline}</strong>
+          </div>
+        </div>
+
+        <button className="view-btn">
+          View <span>→</span>
+        </button>
       </div>
     </article>
   );
