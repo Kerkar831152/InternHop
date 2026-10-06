@@ -1637,3 +1637,184 @@ button {
     align-self: flex-start;
   }
 }
+
+/* =========================
+   ABOUT
+========================= */
+
+.about-section {
+  width: min(1180px, 92%);
+
+  margin: auto;
+  padding: 6rem 0 7rem;
+
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.about-content {
+  max-width: 1000px;
+  margin: auto;
+}
+
+.about-heading {
+  max-width: 720px;
+}
+
+.about-heading h2 {
+  color: #edf4f2;
+
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
+  font-weight: 700;
+
+  line-height: 1.12;
+  letter-spacing: -0.045em;
+}
+
+.about-heading h2 span {
+  color: #19c3a3;
+}
+
+.about-heading p {
+  max-width: 620px;
+
+  margin-top: 0.9rem;
+
+  color: #71848a;
+
+  font-size: 0.7rem;
+  line-height: 1.7;
+}
+
+/* =========================
+   ABOUT CARDS
+========================= */
+
+.about-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+
+  gap: 0.75rem;
+
+  margin-top: 2.2rem;
+}
+
+.about-card {
+  display: flex;
+  align-items: flex-start;
+
+  gap: 0.75rem;
+
+  padding: 1rem;
+
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 11px;
+
+  background: rgba(255, 255, 255, 0.018);
+
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.about-card:hover {
+  border-color: rgba(25, 195, 163, 0.18);
+
+  background: rgba(25, 195, 163, 0.025);
+
+  transform: translateY(-2px);
+}
+
+.about-card-icon {
+  width: 28px;
+  height: 28px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 7px;
+
+  background: rgba(25, 195, 163, 0.08);
+
+  color: #19c3a3;
+
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.about-card h3 {
+  color: #dfe8ea;
+
+  font-size: 0.7rem;
+  font-weight: 650;
+}
+
+.about-card p {
+  margin-top: 0.4rem;
+
+  color: #697c82;
+
+  font-size: 0.57rem;
+  line-height: 1.55;
+}
+
+/* =========================
+   ABOUT FOOTER
+========================= */
+
+.about-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 2rem;
+
+  margin-top: 2.5rem;
+  padding-top: 1.2rem;
+
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.about-footer span {
+  color: #19c3a3;
+
+  font-size: 0.5rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+}
+
+.about-footer p {
+  color: #61737a;
+
+  font-size: 0.58rem;
+
+  text-align: right;
+}
+
+/* =========================
+   ABOUT RESPONSIVE
+========================= */
+
+@media (max-width: 700px) {
+  .about-section {
+    padding: 4rem 0 5rem;
+  }
+
+  .about-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .about-footer {
+    align-items: flex-start;
+
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .about-footer p {
+    text-align: left;
+  }
+}
