@@ -6,7 +6,7 @@ function Profile() {
   return (
     <div className="nav-action-wrapper">
       <button
-        className={`profile-btn ${open ? "profile-btn-active" : ""}`}
+        className={`profile-button ${open ? "active" : ""}`}
         onClick={() => setOpen(!open)}
       >
         <div className="profile-avatar">VK</div>
@@ -21,7 +21,7 @@ function Profile() {
 
       {open && (
         <div className="dropdown profile-dropdown">
-          <div className="profile-dropdown-header">
+          <div className="profile-card-top">
             <div className="profile-avatar-large">VK</div>
 
             <div>
@@ -30,40 +30,38 @@ function Profile() {
             </div>
           </div>
 
-          <div className="profile-completeness">
-            <div className="completeness-header">
+          <div className="profile-progress">
+            <div className="progress-label">
               <span>Profile completeness</span>
               <strong>72%</strong>
             </div>
 
-            <div className="progress-bar">
-              <div className="progress-fill"></div>
+            <div className="progress-track">
+              <div className="progress-value"></div>
             </div>
           </div>
 
           <div className="profile-menu">
             <button>
-              <span>👤</span>
-              <span>My Profile</span>
+              <span>◉</span>
+              My Profile
             </button>
 
             <button>
-              <span>🔖</span>
-              <span>Saved Opportunities</span>
+              <span>◇</span>
+              Saved Opportunities
             </button>
 
             <button>
               <span>⚙</span>
-              <span>Preferences</span>
+              Preferences
             </button>
           </div>
 
-          <div className="profile-dropdown-footer">
-            <button className="sign-out-btn">
-              <span>↪</span>
-              <span>Sign out</span>
-            </button>
-          </div>
+          <button className="sign-out-button">
+            <span>↪</span>
+            Sign out
+          </button>
         </div>
       )}
     </div>

@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
+
 import { hackathons } from "../../data/hackathons";
+
 import HackathonCard from "./HackathonCard";
 import HackathonFilters from "./HackathonFilters";
 
@@ -7,29 +9,32 @@ function Hackathons() {
   const [search, setSearch] = useState("");
   const [location, setLocation] = useState("");
   const [type, setType] = useState("");
-  const [savedIds, setSavedIds] = useState<number[]>([]);
 
-  const filteredHackathons = hackathons.filter((hackathon) => {
-    const query = search.toLowerCase();
+  const [saved, setSaved] = useState<number[]>([]);
 
-    const matchesSearch =
-      hackathon.title.toLowerCase().includes(query) ||
-      hackathon.organizer.toLowerCase().includes(query) ||
-      hackathon.skills.some((skill) =>
-        skill.toLowerCase().includes(query)
-      );
+  const filteredHackathons = useMemo(() => {
+    return hackathons.filter((hackathon) => {
+      const query = search.toLowerCase();
 
-    const matchesLocation =
-      !location || hackathon.location === location;
+      const matchesSearch =
+        hackathon.title.toLowerCase().includes(query) ||
+        hackathon.organizer.toLowerCase().includes(query) ||
+        hackathon.skills.some((skill) =>
+          skill.toLowerCase().includes(query)
+        );
 
-    const matchesType =
-      !type || hackathon.eventType === type;
+      const matchesLocation =
+        !location || hackathon.location === location;
 
-    return matchesSearch && matchesLocation && matchesType;
-  });
+      const matchesType =
+        !type || hackathon.eventType === type;
+
+      return matchesSearch && matchesLocation && matchesType;
+    });
+  }, [search, location, type]);
 
   const toggleSave = (id: number) => {
-    setSavedIds((current) =>
+    setSaved((current) =>
       current.includes(id)
         ? current.filter((savedId) => savedId !== id)
         : [...current, id]
@@ -37,44 +42,54 @@ function Hackathons() {
   };
 
   return (
-    <section className="hackathons-section" id="hackathons">
-      <div className="section-heading">
-        <div>
-          <span className="section-label">COMPETE & BUILD</span>
+    <section
+      className="section opportunities-section alternate-section"
+      id="hackathons"
+    >
+      <div className="section-container">
+        <div className="section-heading-row">
+          <div>
+            <span className="section-label">HACKATHONS</span>
 
-          <h2>Find your next hackathon.</h2>
+            <h2>
+              Build something
+              <span> worth showing.</span>
+            </h2>
 
-          <p>
-            Discover hackathons worth your time and start building.
-          </p>
+            <p>
+              Discover competitions, build challenges, and events
+              worth your weekend.
+            </p>
+          </div>
+
+          <a href="#intnem" className="section-link">
+            Ask Intnem →
+          </a>
         </div>
 
-        <span className="hackathon-count">
-          {filteredHackathons.length} opportunities
-        </span>
-      </div>
+        <HackathonFilters
+          search={search}
+          location={location}
+          type={type}
+          onSearchChange={setSearch}
+          onLocationChange={setLocation}
+          onTypeChange={setType}
+        />
 
-      <HackathonFilters
-        search={search}
-        location={location}
-        type={type}
-        onSearchChange={setSearch}
-        onLocationChange={setLocation}
-        onTypeChange={setType}
-      />
-
-      <div className="hackathon-grid">
-        {filteredHackathons.length > 0 ? (
-          filteredHackathons.map((hackathon) => (
+        <div className="opportunity-grid">
+          {filteredHackathons.map((hackathon) => (
             <HackathonCard
               key={hackathon.id}
               hackathon={hackathon}
-              saved={savedIds.includes(hackathon.id)}
+              saved={saved.includes(hackathon.id)}
               onToggleSave={toggleSave}
             />
-          ))
-        ) : (
-          <div className="no-hackathons">
+          ))}
+        </div>
+
+        {filteredHackathons.length === 0 && (
+          <div className="no-results">
+            <div>⌕</div>
             <h3>No hackathons found</h3>
             <p>Try changing your search or filters.</p>
           </div>

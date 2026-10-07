@@ -1,7 +1,7 @@
 function About() {
   return (
-    <section className="about-section" id="about">
-      <div className="about-content">
+    <section className="section about-section" id="about">
+      <div className="section-container">
         <div className="about-heading">
           <span className="section-label">ABOUT INTERNHOP</span>
 
@@ -11,59 +11,59 @@ function About() {
           </h2>
 
           <p>
-            InternHop brings internships and hackathons into one focused
-            platform, helping students discover opportunities that actually
-            match what they are looking for.
+            InternHop brings internships and hackathons into one
+            focused platform, helping students discover opportunities
+            that actually match what they're looking for.
           </p>
         </div>
 
         <div className="about-grid">
           <div className="about-card">
-            <span className="about-card-icon">⌕</span>
+            <div className="about-number">01</div>
+            <div className="about-icon">⌕</div>
 
-            <div>
-              <h3>Discover</h3>
+            <h3>Discover</h3>
 
-              <p>
-                Find internships and hackathons based on your skills,
-                interests, location, and preferences.
-              </p>
-            </div>
+            <p>
+              Find internships and hackathons based on your skills,
+              interests, location, and preferences.
+            </p>
+          </div>
+
+          <div className="about-card featured">
+            <div className="about-number">02</div>
+            <div className="about-icon">✓</div>
+
+            <h3>Verify</h3>
+
+            <p>
+              Check opportunities found elsewhere and understand the
+              available evidence before applying or registering.
+            </p>
           </div>
 
           <div className="about-card">
-            <span className="about-card-icon">✓</span>
+            <div className="about-number">03</div>
+            <div className="about-icon">✦</div>
 
-            <div>
-              <h3>Verify</h3>
+            <h3>Personalize</h3>
 
-              <p>
-                Check opportunities found elsewhere and understand the
-                available evidence before applying or registering.
-              </p>
-            </div>
-          </div>
-
-          <div className="about-card">
-            <span className="about-card-icon">✦</span>
-
-            <div>
-              <h3>Personalize</h3>
-
-              <p>
-                Build your profile once and get opportunities that become
-                more relevant to your goals over time.
-              </p>
-            </div>
+            <p>
+              Build your profile once and get opportunities that
+              become more relevant to your goals over time.
+            </p>
           </div>
         </div>
 
-        <div className="about-footer">
-          <span>BUILT FOR STUDENTS</span>
+        <div className="about-bottom">
+          <div>
+            <span>BUILT FOR STUDENTS</span>
+            <strong>Less noise. Better opportunities.</strong>
+          </div>
 
           <p>
-            Less noise. Better opportunities. More time spent building
-            your future.
+            InternHop is designed around one simple idea:
+            your time is valuable.
           </p>
         </div>
       </div>

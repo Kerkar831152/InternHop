@@ -6,46 +6,56 @@ function InternshipCard({
   onToggleSave,
 }: InternshipCardProps) {
   return (
-    <article className="internship-card">
-      <div className="internship-card-top">
-        <div>
-          <span className="internship-company">
-            {internship.company}
-          </span>
-
-          <h3>{internship.title}</h3>
+    <article className="opportunity-card">
+      <div className="card-top">
+        <div className="company-logo">
+          {internship.company.charAt(0)}
         </div>
 
         <button
-          className={`save-btn ${saved ? "saved" : ""}`}
+          className={`save-button ${saved ? "saved" : ""}`}
           onClick={() => onToggleSave(internship.id)}
           aria-label="Save internship"
         >
-          {saved ? "★" : "☆"}
+          {saved ? "◆" : "◇"}
         </button>
       </div>
 
-      <div className="internship-meta">
+      <div className="card-company">
+        {internship.company}
+      </div>
+
+      <h3>{internship.title}</h3>
+
+      <div className="card-meta">
         <span>⌖ {internship.location}</span>
         <span>◷ {internship.internshipType}</span>
       </div>
 
-      <div className="internship-skills">
+      <div className="skill-list">
         {internship.skills.map((skill) => (
           <span key={skill}>{skill}</span>
         ))}
       </div>
 
-      <div className="internship-card-bottom">
+      <div className="card-divider"></div>
+
+      <div className="card-bottom">
         <div>
+          <small>STIPEND</small>
           <strong>{internship.stipend}</strong>
-          <span>Deadline: {internship.deadline}</span>
         </div>
 
-        <button className="view-internship-btn">
-          View details
-        </button>
+        <div className="deadline">
+          <small>DEADLINE</small>
+          <strong>{internship.deadline}</strong>
+        </div>
       </div>
+
+      <button className="card-action">
+        View opportunity
+        <span>→</span>
+      </button>
     </article>
   );
 }

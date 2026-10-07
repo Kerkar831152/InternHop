@@ -1,6 +1,8 @@
 import { useState } from "react";
+
 import VerificationForm from "./VerificationForm";
 import VerificationResult from "./VerificationResult";
+
 import type { VerificationResult as VerificationResultType } from "../../types/verification";
 
 function Verify() {
@@ -10,71 +12,104 @@ function Verify() {
     useState<VerificationResultType | null>(null);
 
   const handleVerify = () => {
-    if (!url.trim() && !image) {
-      return;
-    }
-
     setResult({
-      confidence: 82,
+      confidence: 87,
       status: "review",
-      summary: "This opportunity looks mostly legitimate.",
+      summary:
+        "The opportunity has several positive signals, but some details should be checked before applying.",
       checks: [
         {
-          label: "Source found",
+          label: "Opportunity source",
           status: "passed",
           message:
-            "The opportunity source could be identified.",
+            "The source appears to contain identifiable organization information.",
         },
         {
-          label: "Organizer information",
+          label: "Application process",
           status: "passed",
           message:
-            "Organizer information appears consistent.",
+            "No obvious unusual payment requirement was detected.",
         },
         {
-          label: "Deadline",
+          label: "Contact information",
           status: "warning",
           message:
-            "The listed deadline could not be independently confirmed.",
+            "Some contact details could not be independently confirmed.",
         },
         {
-          label: "Registration link",
-          status: "warning",
+          label: "Overall consistency",
+          status: "passed",
           message:
-            "The registration destination requires further review.",
+            "The opportunity details are mostly consistent with the provided listing.",
         },
       ],
     });
   };
 
   return (
-    <section className="verify-section" id="verify">
-      <div className="verify-heading">
-        <span className="section-label">
-          TRUST BEFORE YOU APPLY
-        </span>
+    <section className="section verify-section" id="verify">
+      <div className="section-container">
+        <div className="verify-layout">
+          <div className="verify-copy">
+            <span className="section-label">OPPORTUNITY VERIFY</span>
 
-        <h2>Verify an opportunity.</h2>
+            <h2>
+              Not sure if it's
+              <span> worth trusting?</span>
+            </h2>
 
-        <p>
-          Found an internship or hackathon somewhere else?
-          Let Intnem check the available evidence before you
-          apply.
-        </p>
-      </div>
+            <p>
+              Found an internship or hackathon somewhere else?
+              Send it to InternHop. Intnem can analyze the available
+              information and highlight signals that deserve
+              attention.
+            </p>
 
-      <div className="verify-container">
-        <VerificationForm
-          url={url}
-          onUrlChange={setUrl}
-          image={image}
-          onImageChange={setImage}
-          onVerify={handleVerify}
-        />
+            <div className="verify-flow">
+              <div className="flow-item">
+                <span>01</span>
+                <div>
+                  <strong>Submit</strong>
+                  <p>URL or screenshot</p>
+                </div>
+              </div>
 
-        {result && (
-          <VerificationResult result={result} />
-        )}
+              <div className="flow-line"></div>
+
+              <div className="flow-item">
+                <span>02</span>
+                <div>
+                  <strong>Analyze</strong>
+                  <p>Evidence and signals</p>
+                </div>
+              </div>
+
+              <div className="flow-line"></div>
+
+              <div className="flow-item">
+                <span>03</span>
+                <div>
+                  <strong>Understand</strong>
+                  <p>Confidence and warnings</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="verify-panel">
+            {!result ? (
+              <VerificationForm
+                url={url}
+                onUrlChange={setUrl}
+                image={image}
+                onImageChange={setImage}
+                onVerify={handleVerify}
+              />
+            ) : (
+              <VerificationResult result={result} />
+            )}
+          </div>
+        </div>
       </div>
     </section>
   );

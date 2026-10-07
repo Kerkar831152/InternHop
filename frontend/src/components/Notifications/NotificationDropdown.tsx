@@ -1,4 +1,5 @@
 import { useState } from "react";
+
 import type { NotificationDropdownProps } from "../../types/notification";
 
 function NotificationDropdown({
@@ -12,8 +13,8 @@ function NotificationDropdown({
   ).length;
 
   const markAsRead = (id: number) => {
-    setNotifications((currentNotifications) =>
-      currentNotifications.map((notification) =>
+    setNotifications((current) =>
+      current.map((notification) =>
         notification.id === id
           ? { ...notification, read: true }
           : notification
@@ -22,8 +23,8 @@ function NotificationDropdown({
   };
 
   const markAllAsRead = () => {
-    setNotifications((currentNotifications) =>
-      currentNotifications.map((notification) => ({
+    setNotifications((current) =>
+      current.map((notification) => ({
         ...notification,
         read: true,
       }))
@@ -33,16 +34,14 @@ function NotificationDropdown({
   return (
     <div className="nav-action-wrapper">
       <button
-        className={`icon-btn ${open ? "icon-btn-active" : ""}`}
+        className={`nav-icon-button ${open ? "active" : ""}`}
         onClick={() => setOpen(!open)}
         aria-label="Notifications"
       >
-        🔔
+        <span className="bell-icon">♢</span>
 
         {unreadCount > 0 && (
-          <span className="notification-badge">
-            {unreadCount}
-          </span>
+          <span className="notification-badge">{unreadCount}</span>
         )}
       </button>
 
@@ -50,29 +49,21 @@ function NotificationDropdown({
         <div className="dropdown notification-dropdown">
           <div className="dropdown-header">
             <div>
+              <span className="dropdown-eyebrow">INTERNHOP</span>
               <h3>Notifications</h3>
-
-              <span>
-                {unreadCount === 0
-                  ? "You're all caught up"
-                  : `${unreadCount} unread`}
-              </span>
             </div>
 
             {unreadCount > 0 && (
-              <button
-                className="mark-all-btn"
-                onClick={markAllAsRead}
-              >
+              <button onClick={markAllAsRead} className="text-action">
                 Mark all read
               </button>
             )}
           </div>
 
           {notifications.length === 0 ? (
-            <div className="no-notifications">
-              <span>✓</span>
-              <p>No new notifications</p>
+            <div className="empty-dropdown">
+              <div>✓</div>
+              <p>You're all caught up.</p>
             </div>
           ) : (
             <div className="notification-list">
@@ -80,24 +71,24 @@ function NotificationDropdown({
                 <div
                   key={notification.id}
                   className={`notification-item ${
-                    !notification.read
-                      ? "notification-unread"
-                      : ""
+                    !notification.read ? "unread" : ""
                   }`}
                 >
+                  <div className="notification-dot"></div>
+
                   <div className="notification-content">
                     <strong>{notification.title}</strong>
                     <p>{notification.message}</p>
-                  </div>
 
-                  {!notification.read && (
-                    <button
-                      className="mark-read-btn"
-                      onClick={() => markAsRead(notification.id)}
-                    >
-                      Mark read
-                    </button>
-                  )}
+                    {!notification.read && (
+                      <button
+                        onClick={() => markAsRead(notification.id)}
+                        className="notification-read"
+                      >
+                        Mark as read
+                      </button>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>

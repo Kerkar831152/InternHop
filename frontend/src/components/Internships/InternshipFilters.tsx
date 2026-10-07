@@ -9,13 +9,16 @@ function InternshipFilters({
   onTypeChange,
 }: InternshipFiltersProps) {
   return (
-    <div className="internship-filters">
-      <input
-        type="text"
-        value={search}
-        onChange={(event) => onSearchChange(event.target.value)}
-        placeholder="Search internships..."
-      />
+    <div className="filter-bar">
+      <div className="search-box">
+        <span>⌕</span>
+
+        <input
+          value={search}
+          onChange={(event) => onSearchChange(event.target.value)}
+          placeholder="Search internships..."
+        />
+      </div>
 
       <select
         value={location}

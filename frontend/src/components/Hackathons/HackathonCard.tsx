@@ -6,46 +6,56 @@ function HackathonCard({
   onToggleSave,
 }: HackathonCardProps) {
   return (
-    <article className="hackathon-card">
-      <div className="hackathon-card-top">
-        <div>
-          <span className="hackathon-organizer">
-            {hackathon.organizer}
-          </span>
-
-          <h3>{hackathon.title}</h3>
+    <article className="opportunity-card hackathon-card">
+      <div className="card-top">
+        <div className="company-logo hackathon-logo">
+          {hackathon.organizer.charAt(0)}
         </div>
 
         <button
-          className={`save-btn ${saved ? "saved" : ""}`}
+          className={`save-button ${saved ? "saved" : ""}`}
           onClick={() => onToggleSave(hackathon.id)}
           aria-label="Save hackathon"
         >
-          {saved ? "★" : "☆"}
+          {saved ? "◆" : "◇"}
         </button>
       </div>
 
-      <div className="hackathon-meta">
+      <div className="card-company">
+        {hackathon.organizer}
+      </div>
+
+      <h3>{hackathon.title}</h3>
+
+      <div className="card-meta">
         <span>⌖ {hackathon.location}</span>
         <span>◷ {hackathon.eventType}</span>
       </div>
 
-      <div className="hackathon-skills">
+      <div className="skill-list">
         {hackathon.skills.map((skill) => (
           <span key={skill}>{skill}</span>
         ))}
       </div>
 
-      <div className="hackathon-card-bottom">
+      <div className="card-divider"></div>
+
+      <div className="card-bottom">
         <div>
+          <small>PRIZE POOL</small>
           <strong>{hackathon.prize}</strong>
-          <span>Deadline: {hackathon.deadline}</span>
         </div>
 
-        <button className="view-hackathon-btn">
-          View details
-        </button>
+        <div className="deadline">
+          <small>DEADLINE</small>
+          <strong>{hackathon.deadline}</strong>
+        </div>
       </div>
+
+      <button className="card-action">
+        View hackathon
+        <span>→</span>
+      </button>
     </article>
   );
 }

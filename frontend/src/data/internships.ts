@@ -33,7 +33,7 @@ export const internships: Internship[] = [
   },
   {
     id: 4,
-    title: "AI/ML Intern",
+    title: "AI / ML Intern",
     company: "NeuralWorks",
     location: "Remote",
     internshipType: "Remote",

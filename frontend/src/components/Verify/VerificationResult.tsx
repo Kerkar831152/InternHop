@@ -3,37 +3,61 @@ import type { VerificationResultProps } from "../../types/verification";
 function VerificationResult({
   result,
 }: VerificationResultProps) {
+  const statusClass =
+    result.status === "verified"
+      ? "verified"
+      : result.status === "review"
+        ? "review"
+        : "suspicious";
+
   return (
     <div className="verification-result">
-      <div className="verification-result-header">
+      <div className="result-header">
         <div>
-          <span className="section-label">
-            VERIFICATION RESULT
-          </span>
+          <span className="section-label">ANALYSIS COMPLETE</span>
 
-          <h3>{result.summary}</h3>
+          <h3>Verification result</h3>
         </div>
 
-        <div
-          className={`confidence confidence-${result.status}`}
-        >
-          {result.confidence}%
+        <div className={`confidence-circle ${statusClass}`}>
+          <strong>{result.confidence}%</strong>
           <span>confidence</span>
+        </div>
+      </div>
+
+      <div className={`result-status ${statusClass}`}>
+        <span>
+          {result.status === "verified"
+            ? "✓"
+            : result.status === "review"
+              ? "!"
+              : "×"}
+        </span>
+
+        <div>
+          <strong>
+            {result.status === "verified"
+              ? "Looks legitimate"
+              : result.status === "review"
+                ? "Needs a closer look"
+                : "Potential warning signs"}
+          </strong>
+
+          <p>{result.summary}</p>
         </div>
       </div>
 
       <div className="verification-checks">
         {result.checks.map((check) => (
-          <div
-            key={check.label}
-            className={`verification-check check-${check.status}`}
-          >
-            <div className="check-icon">
+          <div className="verification-check" key={check.label}>
+            <div
+              className={`check-icon ${check.status}`}
+            >
               {check.status === "passed"
                 ? "✓"
                 : check.status === "warning"
-                ? "!"
-                : "×"}
+                  ? "!"
+                  : "×"}
             </div>
 
             <div>
@@ -43,10 +67,6 @@ function VerificationResult({
           </div>
         ))}
       </div>
-
-      <button className="evidence-btn">
-        View evidence
-      </button>
     </div>
   );
 }

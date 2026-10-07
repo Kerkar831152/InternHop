@@ -1,14 +1,14 @@
+export interface VerificationCheck {
+  label: string;
+  status: "passed" | "warning" | "failed";
+  message: string;
+}
+
 export interface VerificationResult {
   confidence: number;
   status: "verified" | "review" | "suspicious";
   summary: string;
   checks: VerificationCheck[];
-}
-
-export interface VerificationCheck {
-  label: string;
-  status: "passed" | "warning" | "failed";
-  message: string;
 }
 
 export interface VerificationFormProps {

@@ -1,7 +1,8 @@
 import { useState } from "react";
+
 import NotificationDropdown from "../Notifications/NotificationDropdown";
 import Profile from "../Profile/Profile";
-import Intnem from "../Intnem/Intnem";
+
 import type { Notification } from "../../types/notification";
 
 function Navbar() {
@@ -9,7 +10,7 @@ function Navbar() {
     {
       id: 1,
       title: "New internship match",
-      message: "A React internship matches your skills.",
+      message: "A React internship matches your profile.",
       type: "recommended",
       read: false,
     },
@@ -22,59 +23,41 @@ function Navbar() {
     },
   ]);
 
-  const [intnemOpen, setIntnemOpen] = useState(false);
-
   return (
-    <>
-      <nav className="navbar">
-        <div className="logo">
-          Intern<span>Hop</span>
+    <nav className="navbar">
+      <a href="#home" className="brand">
+        <div className="brand-mark">
+          <span>✦</span>
         </div>
 
-        <div className="nav-links">
-          <a href="#internships" className="active">
-            Internships
-          </a>
-
-          <a href="#hackathons">
-            Hackathons
-          </a>
-
-          <a href="#verify">
-            Verify
-          </a>
-
-          <a href="#about">
-            About
-          </a>
+        <div className="brand-text">
+          <strong>Intern<span>Hop</span></strong>
+          <small>OPPORTUNITY PLATFORM</small>
         </div>
+      </a>
 
-        <div className="navbar-actions">
-          <button
-            className={`intnem-nav-btn ${
-              intnemOpen ? "intnem-nav-btn-active" : ""
-            }`}
-            onClick={() => setIntnemOpen(!intnemOpen)}
-          >
-            <span className="intnem-logo">✦</span>
-            <span>Ask Intnem</span>
-          </button>
+      <div className="nav-links">
+        <a href="#home">Home</a>
+        <a href="#internships">Internships</a>
+        <a href="#hackathons">Hackathons</a>
+        <a href="#verify">Verify</a>
+        <a href="#about">About</a>
+      </div>
 
-          <NotificationDropdown
-            notifications={notifications}
-            setNotifications={setNotifications}
-          />
+      <div className="navbar-actions">
+        <a href="#intnem" className="ask-intnem-btn">
+          <span className="ask-intnem-icon">✦</span>
+          <span>Ask Intnem</span>
+        </a>
 
-          <Profile />
-        </div>
-      </nav>
+        <NotificationDropdown
+          notifications={notifications}
+          setNotifications={setNotifications}
+        />
 
-      {intnemOpen && (
-        <div className="intnem-overlay">
-          <Intnem />
-        </div>
-      )}
-    </>
+        <Profile />
+      </div>
+    </nav>
   );
 }
 

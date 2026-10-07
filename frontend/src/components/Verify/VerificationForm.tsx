@@ -1,3 +1,7 @@
+import { useRef } from "react";
+
+import type { ChangeEvent } from "react";
+
 import type { VerificationFormProps } from "../../types/verification";
 
 function VerificationForm({
@@ -7,67 +11,67 @@ function VerificationForm({
   onImageChange,
   onVerify,
 }: VerificationFormProps) {
-  const handleImageChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const file = event.target.files?.[0];
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-    if (file) {
-      onImageChange(file);
-    }
+  const handleFileChange = (
+    event: ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0] ?? null;
+    onImageChange(file);
   };
 
   return (
     <div className="verification-form">
-      <div className="verification-url">
-        <span>🔗</span>
+      <div className="verification-input-group">
+        <label>Opportunity URL</label>
 
-        <input
-          type="text"
-          value={url}
-          onChange={(event) => onUrlChange(event.target.value)}
-          placeholder="Paste an opportunity URL..."
-        />
+        <div className="url-input">
+          <span>↗</span>
+
+          <input
+            type="url"
+            value={url}
+            onChange={(event) => onUrlChange(event.target.value)}
+            placeholder="Paste an internship or hackathon URL..."
+          />
+        </div>
       </div>
 
-      <div className="verification-divider">
+      <div className="verify-divider">
         <span>OR</span>
       </div>
 
-      <label className="verification-upload">
-        <span className="verification-upload-icon">↑</span>
+      <div className="upload-zone">
+        <div className="upload-icon">▧</div>
 
-        <span>
+        <strong>
           {image ? image.name : "Upload a screenshot"}
-        </span>
+        </strong>
 
-        <small>
-          PNG, JPG or WEBP
-        </small>
+        <p>
+          Upload a poster, LinkedIn post, or opportunity listing.
+        </p>
+
+        <button
+          onClick={() => fileInputRef.current?.click()}
+          className="upload-button"
+        >
+          Choose image
+        </button>
 
         <input
+          ref={fileInputRef}
           type="file"
           accept="image/*"
-          onChange={handleImageChange}
+          onChange={handleFileChange}
           hidden
         />
-      </label>
+      </div>
 
-      {image && (
-        <button
-          className="verification-remove"
-          onClick={() => onImageChange(null)}
-        >
-          Remove screenshot
-        </button>
-      )}
-
-      <button
-        className="verify-btn"
-        onClick={onVerify}
-        disabled={!url.trim() && !image}
-      >
-        Verify opportunity
+      <button className="verify-button" onClick={onVerify}>
+        <span>✦</span>
+        Analyze opportunity
+        <span>→</span>
       </button>
     </div>
   );
