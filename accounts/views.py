@@ -4,6 +4,7 @@ from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET, require_POST
+from django.views.decorators.csrf import ensure_csrf_cookie
 
 User = get_user_model()
 
@@ -172,3 +173,8 @@ def current_user(request):
         },
         status=200,
     )
+
+@require_GET
+@ensure_csrf_cookie
+def csrf_token(request):
+    return JsonResponse({"message": "CSRF cookie set."})
