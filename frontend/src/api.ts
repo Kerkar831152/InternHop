@@ -1,3 +1,4 @@
+import type { RegisterData, RegisterResponse } from "./types/auth";
 
 const API_BASE_URL = "http://localhost:8000/api";
 
@@ -72,4 +73,16 @@ async function apiRequest<T = unknown>(
     return data as T;
 }
 
-export { API_BASE_URL, apiRequest };
+async function registerUser(
+    data: RegisterData,
+): Promise<RegisterResponse> {
+    return apiRequest<RegisterResponse>("/accounts/register/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+    });
+}
+
+export { API_BASE_URL, apiRequest, registerUser };
