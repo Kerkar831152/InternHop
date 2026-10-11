@@ -1,11 +1,13 @@
-
 import { useState } from "react";
-import type { ChangeEvent, SubmitEvent} from "react";    
+import type { ChangeEvent, FormEvent } from "react";
 
 import { registerUser } from "../../api";
-import type { RegisterData } from "../../types/auth";
+import type { RegisterData, RegisterProps } from "../../types/auth";
 
-function Register() {
+function Register({
+    onRegistrationSuccess,
+    onGoToLogin,
+}: RegisterProps) {
     const [formData, setFormData] = useState<RegisterData>({
         username: "",
         email: "",
@@ -14,97 +16,136 @@ function Register() {
 
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState("");
-    
-    function handleChange(event: ChangeEvent<HTMLInputElement>) 
-    {
+    const [isError, setIsError] = useState(false);
+
+    function handleChange(event: ChangeEvent<HTMLInputElement>) {
         const { name, value } = event.target;
+
         setFormData((previousData) => ({
             ...previousData,
             [name]: value,
-       }));
+        }));
     }
 
-    
-async function handleSubmit(
-    event: SubmitEvent<HTMLFormElement>
-) {
-    event.preventDefault();
+    async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+        event.preventDefault();
 
-    setLoading(true);
-    setMessage("");
+        setLoading(true);
+        setMessage("");
+        setIsError(false);
 
-    try {
-        const response = await registerUser(formData);
-        setMessage(response.message);
+        try {
+            const response = await registerUser(formData);
 
-        setFormData({
-            username: "",
-            email: "",
-            password: "",
-        });
-    } catch (error) {
-        if (error instanceof Error) {
-            setMessage(error.message);
-        } else {
-            setMessage("Something went wrong. Please try again.");
+            setMessage(response.message);
+
+            setFormData({
+                username: "",
+                email: "",
+                password: "",
+            });
+
+            onRegistrationSuccess();
+        } catch (error) {
+            setIsError(true);
+
+            if (error instanceof Error) {
+                setMessage(error.message);
+            } else {
+                setMessage("Something went wrong. Please try again.");
+            }
+        } finally {
+            setLoading(false);
         }
-    } finally {
-        setLoading(false);
     }
-}
-
 
     return (
-        <div className="register-container">
-            <h1>Create your InternHop account</h1>
-            <p>Sign up to get started.</p>
+        <section className="register-container">
+            <div className="auth-heading">
+                <span className="auth-eyebrow">JOIN INTERNHOP</span>
+
+                <h1>Create your account</h1>
+
+                <p>
+                    Start discovering opportunities that fit your skills
+                    and interests.
+                </p>
+            </div>
 
             <form onSubmit={handleSubmit}>
-                <div>
-                    <label htmlFor="username">Username</label>
+                <div className="auth-form-field">
+                    <label htmlFor="register-username">Username</label>
+
                     <input
-                    type="text"
-                    id="username"
-                    name="username"
-                    placeholder="Enter your username"
-                    value={formData.username}
-                    onChange={handleChange}
-                    required
+                        type="text"
+                        id="register-username"
+                        name="username"
+                        placeholder="Choose a username"
+                        value={formData.username}
+                        onChange={handleChange}
+                        autoComplete="username"
+                        required
                     />
                 </div>
 
-                <div>
-                    <label htmlFor="email">Email</label>
+                <div className="auth-form-field">
+                    <label htmlFor="register-email">Email address</label>
+
                     <input
                         type="email"
-                        id="email"
+                        id="register-email"
                         name="email"
                         placeholder="Enter your email"
                         value={formData.email}
                         onChange={handleChange}
+                        autoComplete="email"
                         required
                     />
                 </div>
 
-                <div>
-                    <label htmlFor="password">Password</label>
+                <div className="auth-form-field">
+                    <label htmlFor="register-password">Password</label>
+
                     <input
                         type="password"
-                        id="password"
+                        id="register-password"
                         name="password"
                         placeholder="Create a password"
                         value={formData.password}
                         onChange={handleChange}
+                        autoComplete="new-password"
                         required
                     />
                 </div>
 
-                <button type="submit" disabled={loading}>
+                <button
+                    className="auth-submit-btn"
+                    type="submit"
+                    disabled={loading}
+                >
                     {loading ? "Creating account..." : "Create account"}
                 </button>
-                {message && <p>{message}</p>}
+
+                {message && (
+                    <p
+                        className={`auth-message ${
+                            isError ? "auth-message-error" : "auth-message-success"
+                        }`}
+                        role="status"
+                    >
+                        {message}
+                    </p>
+                )}
             </form>
-        </div>
+
+            <div className="auth-switch">
+                <span>Already have an account?</span>
+
+                <button type="button" onClick={onGoToLogin}>
+                    Log in
+                </button>
+            </div>
+        </section>
     );
 }
 

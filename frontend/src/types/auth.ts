@@ -1,15 +1,28 @@
+export interface LoginData {
+    username: string;
+    password: string;
+}
 
-export type RegisterData = {
+export interface RegisterData {
     username: string;
     email: string;
     password: string;
-};
+}
 
-export type RegisterResponse = {
+export interface LoginResponse {
     message: string;
-    user: {
-        id: number;
-        username: string;
-        email: string;
-    };
-};
+}
+
+export interface RegisterResponse {
+    message: string;
+}
+
+export interface LoginProps {
+    onLoginSuccess: (username: string) => void;
+    onGoToRegister: () => void;
+}
+
+export interface RegisterProps {
+    onRegistrationSuccess: () => void;
+    onGoToLogin: () => void;
+}
