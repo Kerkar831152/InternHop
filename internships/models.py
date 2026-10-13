@@ -18,7 +18,7 @@ class Internship(models.Model):
     internship_type = models.CharField(max_length=50)
     deadline = models.DateField(null=True, blank=True)
     source_url = models.URLField(max_length=200)
-    
+
     status = models.CharField(
         max_length=10,
         choices=Status.choices,
@@ -28,6 +28,7 @@ class Internship(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     last_seen_at = models.DateTimeField(auto_now_add=True)
+    expired_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.title} at {self.company}"

@@ -1,7 +1,9 @@
+
 from django.db import models
 
+
 class Hackathon(models.Model):
-    
+
     class Status(models.TextChoices):
         ACTIVE = "active", "Active"
         EXPIRED = "expired", "Expired"
@@ -29,10 +31,12 @@ class Hackathon(models.Model):
         null=True,
         blank=True,
     )
+
     start_date = models.DateField(
         null=True,
         blank=True,
     )
+
     end_date = models.DateField(
         null=True,
         blank=True,
@@ -49,6 +53,10 @@ class Hackathon(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     last_seen_at = models.DateTimeField(auto_now_add=True)
+    expired_at = models.DateTimeField(
+        null=True,
+        blank=True,
+    )
 
     def __str__(self):
         return self.title
