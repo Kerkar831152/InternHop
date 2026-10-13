@@ -1,5 +1,10 @@
-from email.policy import default
-
 from django.shortcuts import render
 
-# Create your views here.
+from rest_framework.generics import ListAPIView
+from .models import Internship
+from .serializers import InternshipSerializer
+
+
+class InternshipListView(ListAPIView):
+    queryset = Internship.objects.all()
+    serializer_class = InternshipSerializer
