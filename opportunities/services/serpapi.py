@@ -26,8 +26,8 @@ def search_google(query, num_results=10):
         response = requests.get(
             SERPAPI_URL,
             params=params,
-            timeout=30,
-        )
+            timeout=(5, 20),
+            )
         response.raise_for_status()
     except requests.RequestException as exc:
         raise RuntimeError(f"SerpApi request failed: {exc}") from exc
