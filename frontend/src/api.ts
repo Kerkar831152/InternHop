@@ -60,6 +60,7 @@ async function initializeCsrf(): Promise<void> {
     }
 }
 
+
 async function apiRequest<T = unknown>(
     endpoint: string,
     options: ApiOptions = {},
@@ -84,7 +85,31 @@ async function apiRequest<T = unknown>(
         credentials: "include",
     });
 
-    const data: unknown = await response.json();
+    if (response.status === 204) {
+        return undefined as T;
+    }
+
+    const text = await response.text();
+
+    if (!text) {
+        if (!response.ok) {
+            throw new Error(`Request failed with status ${response.status}`);
+        }
+
+        return undefined as T;
+    }
+
+    let data: unknown;
+
+    try {
+        data = JSON.parse(text);
+    } catch {
+        if (!response.ok) {
+            throw new Error(`Request failed with status ${response.status}`);
+        }
+
+        throw new Error("The server returned an invalid response.");
+    }
 
     if (!response.ok) {
         const message =
@@ -103,13 +128,14 @@ async function apiRequest<T = unknown>(
                       "message" in data &&
                       typeof data.message === "string"
                     ? data.message
-                    : "Request failed";
+                    : `Request failed with status ${response.status}`;
 
         throw new Error(message);
     }
 
     return data as T;
 }
+
 
 async function registerUser(
     data: RegisterData,
@@ -142,12 +168,28 @@ async function getInternships(): Promise<InternshipRecord[]> {
     return Array.isArray(data) ? data : data.results;
 }
 
+
+export async function deleteInternship(id: number): Promise<void> {
+    await apiRequest(`/internships/${id}/`, {
+        method: "DELETE",
+    });
+}
+
+
 async function getHackathons(): Promise<HackathonRecord[]> {
     const data = await apiRequest<HackathonRecord[] | { results: HackathonRecord[] }>(
         "/hackathons/",
     );
     return Array.isArray(data) ? data : data.results;
 }
+
+
+export async function deleteHackathon(id: number): Promise<void> {
+    await apiRequest(`/hackathons/${id}/`, {
+        method: "DELETE",
+    });
+}
+
 
 export {
     API_BASE_URL,

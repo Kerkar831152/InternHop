@@ -1,9 +1,18 @@
 import { useEffect, useMemo, useState } from "react";
-import { getHackathons, type HackathonRecord } from "../../api";
+import {
+  getHackathons,
+  deleteHackathon,
+  type HackathonRecord,
+} from "../../api";
 import HackathonCard from "./HackathonCard";
 import HackathonFilters from "./HackathonFilters";
 
-function Hackathons() {
+
+interface HackathonsProps {
+  isAdmin: boolean;
+}
+
+function Hackathons({ isAdmin }: HackathonsProps) {
   const [search, setSearch] = useState("");
   const [location, setLocation] = useState("");
   const [type, setType] = useState("");
@@ -72,6 +81,27 @@ function Hackathons() {
         : [...current, id]
     );
   };
+
+  const handleDelete = async (id: number) => {
+  if (!window.confirm("Are you sure you want to delete this hackathon?")) {
+    return;
+  }
+
+  try {
+    await deleteHackathon(id);
+
+    setHackathons((current) =>
+      current.filter((hackathon) => hackathon.id !== id)
+    );
+  } catch (err) {
+    alert(
+      err instanceof Error
+        ? err.message
+        : "Failed to delete hackathon."
+    );
+  }
+}; 
+
 
   return (
     <section
@@ -144,6 +174,8 @@ function Hackathons() {
                   }}
                   saved={saved.includes(hackathon.id)}
                   onToggleSave={toggleSave}
+                  isAdmin={isAdmin}
+                  onDelete={handleDelete}
                 />
               ))}
             </div>

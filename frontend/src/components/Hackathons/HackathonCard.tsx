@@ -1,10 +1,18 @@
+
 import type { HackathonCardProps } from "../../types/hackathons";
+
+interface ExtendedHackathonCardProps extends HackathonCardProps {
+  isAdmin?: boolean;
+  onDelete?: (id: number) => void;
+}
 
 function HackathonCard({
   hackathon,
   saved,
   onToggleSave,
-}: HackathonCardProps) {
+  isAdmin = false,
+  onDelete,
+}: ExtendedHackathonCardProps) {
   const sourceUrl = hackathon.source_url ?? "";
 
   return (
@@ -14,14 +22,26 @@ function HackathonCard({
           {hackathon.organizer.charAt(0)}
         </div>
 
-        <button
-          className={`save-button ${saved ? "saved" : ""}`}
-          onClick={() => onToggleSave(hackathon.id)}
-          aria-label={saved ? "Unsave hackathon" : "Save hackathon"}
-          aria-pressed={saved}
-        >
-          {saved ? "◆" : "◇"}
-        </button>
+        <div className="card-top-actions">
+          <button
+            className={`save-button ${saved ? "saved" : ""}`}
+            onClick={() => onToggleSave(hackathon.id)}
+            aria-label={saved ? "Unsave hackathon" : "Save hackathon"}
+            aria-pressed={saved}
+          >
+            {saved ? "◆" : "◇"}
+          </button>
+
+          {isAdmin && onDelete && (
+            <button
+              className="delete-button"
+              onClick={() => onDelete(hackathon.id)}
+              aria-label={`Delete ${hackathon.title}`}
+            >
+              Delete
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="card-company">

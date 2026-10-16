@@ -1,5 +1,8 @@
-import { useState } from "react";
+
+import { useEffect, useState } from "react";
 import "./App.css";
+
+import { apiRequest } from "./api";
 
 import Navbar from "./components/Navbar/Navbar";
 import Home from "./components/Home/Home";
@@ -12,26 +15,80 @@ import Footer from "./components/Footer/Footer";
 
 import Register from "./components/Pages/Register";
 import Login from "./components/Pages/Login";
+import AdminDashboard from "./components/Pages/AdminDashboard";
 
 import type { Page } from "./types/navigation";
+
+interface CurrentUserResponse {
+    user?: {
+        username?: string;
+        is_admin?: boolean;
+    } | null;
+}
 
 function App() {
     const [page, setPage] = useState<Page>("home");
     const [username, setUsername] = useState<string | null>(null);
+    const [isAdmin, setIsAdmin] = useState(false);
+
+    useEffect(() => {
+        let active = true;
+
+        apiRequest<CurrentUserResponse>("/accounts/me/")
+            .then((data) => {
+                if (active) {
+                    setUsername(data.user?.username ?? null);
+                    setIsAdmin(data.user?.is_admin === true);
+                }
+            })
+            .catch(() => {
+                if (active) {
+                    setUsername(null);
+                    setIsAdmin(false);
+                }
+            });
+
+        return () => {
+            active = false;
+        };
+    }, []);
 
     const isAuthenticated = username !== null;
 
-    function handleLoginSuccess(loggedInUsername: string) {
+    async function handleLoginSuccess(loggedInUsername: string) {
         setUsername(loggedInUsername);
         setPage("home");
+
+        try {
+            const data = await apiRequest<CurrentUserResponse>(
+                "/accounts/me/"
+            );
+            setIsAdmin(data.user?.is_admin === true);
+        } catch {
+            setIsAdmin(false);
+        }
     }
 
-    function handleLogout() {
-        setUsername(null);
-        setPage("home");
+    async function handleLogout() {
+        try {
+            await apiRequest("/accounts/logout/", {
+                method: "POST",
+            });
+
+            setUsername(null);
+            setIsAdmin(false);
+            setPage("home");
+        } catch (error) {
+            console.error("Logout failed:", error);
+        }
     }
 
     function handleNavigate(nextPage: Page) {
+        if (nextPage === "admin" && !isAdmin) {
+            setPage("home");
+            return;
+        }
+
         setPage(nextPage);
     }
 
@@ -39,6 +96,7 @@ function App() {
         <div className="app">
             <Navbar
                 isAuthenticated={isAuthenticated}
+                isAdmin={isAdmin}
                 username={username}
                 onNavigate={handleNavigate}
                 onLogout={handleLogout}
@@ -48,8 +106,8 @@ function App() {
                 {page === "home" && (
                     <>
                         <Home />
-                        <Internships />
-                        <Hackathons />
+                       <Internships isAdmin={isAdmin} />
+                       <Hackathons isAdmin={isAdmin} />
                         <Verify />
                         <Intnem />
                         <About />
@@ -68,6 +126,10 @@ function App() {
                         onLoginSuccess={handleLoginSuccess}
                         onGoToRegister={() => setPage("register")}
                     />
+                )}
+
+                {page === "admin" && isAdmin && (
+                    <AdminDashboard />
                 )}
             </main>
 

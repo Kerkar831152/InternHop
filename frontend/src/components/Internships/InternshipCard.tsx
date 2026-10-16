@@ -1,10 +1,18 @@
+
 import type { InternshipCardProps } from "../../types/internships";
+
+interface ExtendedInternshipCardProps extends InternshipCardProps {
+  isAdmin?: boolean;
+  onDelete?: (id: number) => void;
+}
 
 function InternshipCard({
   internship,
   saved,
   onToggleSave,
-}: InternshipCardProps) {
+  isAdmin = false,
+  onDelete,
+}: ExtendedInternshipCardProps) {
   const sourceUrl = internship.source_url ?? "";
 
   return (
@@ -14,20 +22,29 @@ function InternshipCard({
           {internship.company.charAt(0)}
         </div>
 
-        <button
-          className={`save-button ${saved ? "saved" : ""}`}
-          onClick={() => onToggleSave(internship.id)}
-          aria-label={saved ? "Unsave internship" : "Save internship"}
-          aria-pressed={saved}
-        >
-          {saved ? "◆" : "◇"}
-        </button>
+        <div className="card-top-actions">
+          <button
+            className={`save-button ${saved ? "saved" : ""}`}
+            onClick={() => onToggleSave(internship.id)}
+            aria-label={saved ? "Unsave internship" : "Save internship"}
+            aria-pressed={saved}
+          >
+            {saved ? "◆" : "◇"}
+          </button>
+
+          {isAdmin && onDelete && (
+            <button
+              className="delete-button"
+              onClick={() => onDelete(internship.id)}
+              aria-label={`Delete ${internship.title}`}
+            >
+              Delete
+            </button>
+          )}
+        </div>
       </div>
 
-      <div className="card-company">
-        {internship.company}
-      </div>
-
+      <div className="card-company">{internship.company}</div>
       <h3>{internship.title}</h3>
 
       <div className="card-meta">
@@ -55,19 +72,16 @@ function InternshipCard({
         </div>
       </div>
 
-      {sourceUrl && (
+      {sourceUrl ? (
         <a
           className="card-action"
           href={sourceUrl}
           target="_blank"
           rel="noopener noreferrer"
         >
-          View opportunity
-          <span>→</span>
+          View opportunity <span>→</span>
         </a>
-      )}
-
-      {!sourceUrl && (
+      ) : (
         <button className="card-action" disabled>
           Link unavailable
         </button>

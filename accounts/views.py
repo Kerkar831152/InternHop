@@ -79,6 +79,7 @@ def register(request):
                 "id": user.id,
                 "username": user.username,
                 "email": user.email,
+                "is_admin": user.is_staff,
             },
         },
         status=201,
@@ -154,7 +155,6 @@ def logout_view(request):
         status=200,
     )
 
-
 @require_GET
 def current_user(request):
     if not request.user.is_authenticated:
@@ -169,6 +169,7 @@ def current_user(request):
                 "id": request.user.id,
                 "username": request.user.username,
                 "email": request.user.email,
+                "is_admin": request.user.is_staff,
             }
         },
         status=200,

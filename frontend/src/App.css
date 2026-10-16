@@ -3561,3 +3561,61 @@ a {
         padding: 38px 0;
     }
 }
+
+.card-top-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.delete-button {
+    padding: 7px 10px;
+    border: 1px solid #e5b5b5;
+    border-radius: 6px;
+    background: transparent;
+    color: #c62828;
+    cursor: pointer;
+}
+
+.delete-button:hover {
+    background: #fff0f0;
+}
+
+
+.card-top-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.delete-button {
+    padding: 4px 8px;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.2;
+    border: 1px solid #e5b5b5;
+    border-radius: 5px;
+    background: transparent;
+    color: #c62828;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.delete-button:hover {
+    background: #fff0f0;
+    border-color: #c62828;
+}
+
+.delete-button:focus-visible {
+    outline: 2px solid #c62828;
+    outline-offset: 2px;
+}
+
+.card-top-actions .save-button {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

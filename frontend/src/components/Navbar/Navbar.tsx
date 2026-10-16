@@ -8,6 +8,7 @@ import { useState } from "react";
 
 function Navbar({
     isAuthenticated,
+    isAdmin,
     username,
     onNavigate,
     onLogout,
@@ -55,6 +56,15 @@ function Navbar({
                 <a href="#about" onClick={() => onNavigate("home")}>
                     About
                 </a>
+
+                {isAuthenticated && isAdmin && (
+                    <button
+                        className="auth-nav-login"
+                        onClick={() => onNavigate("admin")}
+                    >
+                        Admin Dashboard
+                    </button>
+                )}
             </div>
 
             <div className="navbar-actions">

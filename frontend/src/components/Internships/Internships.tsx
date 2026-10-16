@@ -2,8 +2,14 @@ import { useEffect, useMemo, useState } from "react";
 import { getInternships, type InternshipRecord } from "../../api";
 import InternshipCard from "./InternshipCard";
 import InternshipFilters from "./InternshipFilters";
+import { deleteInternship } from "../../api";
 
-function Internships() {
+
+interface InternshipsProps {
+  isAdmin: boolean;
+}
+
+function Internships({ isAdmin }: InternshipsProps) {
   const [search, setSearch] = useState("");
   const [location, setLocation] = useState("");
   const [type, setType] = useState("");
@@ -76,6 +82,25 @@ function Internships() {
     );
   };
 
+  const handleDelete = async (id: number) => {
+  if (!window.confirm("Are you sure you want to delete this internship?")) {
+    return;
+  }
+
+  try {
+    await deleteInternship(id);
+    setInternships((current) =>
+      current.filter((internship) => internship.id !== id)
+    );
+  } catch (err) {
+    alert(
+      err instanceof Error
+        ? err.message
+        : "Failed to delete internship."
+    );
+  }
+};
+
   return (
     <section className="section opportunities-section" id="internships">
       <div className="section-container">
@@ -138,9 +163,12 @@ function Internships() {
                       .filter(Boolean),
                     stipend: internship.stipend || "Not specified",
                     deadline: internship.deadline || "Not specified",
+                    source_url: internship.source_url,
                   }}
                   saved={saved.includes(internship.id)}
                   onToggleSave={toggleSave}
+                  isAdmin={isAdmin}
+                  onDelete={handleDelete}
                 />
               ))}
             </div>
