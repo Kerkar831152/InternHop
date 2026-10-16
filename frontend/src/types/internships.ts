@@ -7,6 +7,7 @@ export interface Internship {
   skills: string[];
   stipend: string;
   deadline: string;
+  source_url?: string;
 }
 
 export interface InternshipCardProps {

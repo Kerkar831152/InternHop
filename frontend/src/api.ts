@@ -9,6 +9,35 @@ const API_BASE_URL = "http://localhost:8000/api";
 
 type ApiOptions = Omit<RequestInit, "credentials">;
 
+export interface InternshipRecord {
+    id: number;
+    title: string;
+    company: string;
+    location: string;
+    internship_type: string;
+    skills: string;
+    stipend: string;
+    deadline: string | null;
+    description: string;
+    source_url: string;
+    status: string;
+}
+
+export interface HackathonRecord {
+    id: number;
+    title: string;
+    organizer: string;
+    location: string;
+    event_type: string;
+    themes: string;
+    participation_mode: "online" | "offline" | "hybrid";
+    registration_deadline: string | null;
+    start_date: string | null;
+    end_date: string | null;
+    description: string;
+    source_url: string;
+    status: string;
+}
 
 function getCsrfToken(): string | null {
     const csrfCookie = document.cookie
@@ -40,13 +69,12 @@ async function apiRequest<T = unknown>(
 
     if (["POST", "PUT", "PATCH", "DELETE"].includes(method)) {
         await initializeCsrf();
-    }
 
-    if (["POST", "PUT", "PATCH", "DELETE"].includes(method)) {
         const csrfToken = getCsrfToken();
         if (!csrfToken) {
             throw new Error("CSRF token not found");
         }
+
         headers.set("X-CSRFToken", csrfToken);
     }
 
@@ -67,10 +95,15 @@ async function apiRequest<T = unknown>(
                 ? data.error
                 : typeof data === "object" &&
                     data !== null &&
-                    "message" in data &&
-                    typeof data.message === "string"
-                  ? data.message
-                  : "Request failed";
+                    "detail" in data &&
+                    typeof data.detail === "string"
+                  ? data.detail
+                  : typeof data === "object" &&
+                      data !== null &&
+                      "message" in data &&
+                      typeof data.message === "string"
+                    ? data.message
+                    : "Request failed";
 
         throw new Error(message);
     }
@@ -91,15 +124,36 @@ async function registerUser(
 }
 
 async function loginUser(
-    data: LoginData
+    data: LoginData,
 ): Promise<LoginResponse> {
-    return apiRequest<LoginResponse>(
-        "/accounts/login/",
-        {
-            method: "POST",
-            body: JSON.stringify(data),
-        }
-    );
+    return apiRequest<LoginResponse>("/accounts/login/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+    });
 }
 
-export { API_BASE_URL, apiRequest, registerUser, loginUser };
+async function getInternships(): Promise<InternshipRecord[]> {
+    const data = await apiRequest<InternshipRecord[] | { results: InternshipRecord[] }>(
+        "/internships/",
+    );
+    return Array.isArray(data) ? data : data.results;
+}
+
+async function getHackathons(): Promise<HackathonRecord[]> {
+    const data = await apiRequest<HackathonRecord[] | { results: HackathonRecord[] }>(
+        "/hackathons/",
+    );
+    return Array.isArray(data) ? data : data.results;
+}
+
+export {
+    API_BASE_URL,
+    apiRequest,
+    registerUser,
+    loginUser,
+    getInternships,
+    getHackathons,
+};

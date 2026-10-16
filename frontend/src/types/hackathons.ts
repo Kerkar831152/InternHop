@@ -7,6 +7,7 @@ export interface Hackathon {
   skills: string[];
   prize: string;
   deadline: string;
+  source_url?: string;
 }
 
 export interface HackathonCardProps {

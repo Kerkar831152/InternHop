@@ -5,6 +5,8 @@ function HackathonCard({
   saved,
   onToggleSave,
 }: HackathonCardProps) {
+  const sourceUrl = hackathon.source_url ?? "";
+
   return (
     <article className="opportunity-card hackathon-card">
       <div className="card-top">
@@ -15,7 +17,8 @@ function HackathonCard({
         <button
           className={`save-button ${saved ? "saved" : ""}`}
           onClick={() => onToggleSave(hackathon.id)}
-          aria-label="Save hackathon"
+          aria-label={saved ? "Unsave hackathon" : "Save hackathon"}
+          aria-pressed={saved}
         >
           {saved ? "◆" : "◇"}
         </button>
@@ -52,10 +55,21 @@ function HackathonCard({
         </div>
       </div>
 
-      <button className="card-action">
-        View hackathon
-        <span>→</span>
-      </button>
+      {sourceUrl ? (
+        <a
+          className="card-action"
+          href={sourceUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          View hackathon
+          <span>→</span>
+        </a>
+      ) : (
+        <button className="card-action" disabled>
+          Link unavailable
+        </button>
+      )}
     </article>
   );
 }

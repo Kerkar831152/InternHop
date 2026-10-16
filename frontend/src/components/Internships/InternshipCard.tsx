@@ -5,6 +5,8 @@ function InternshipCard({
   saved,
   onToggleSave,
 }: InternshipCardProps) {
+  const sourceUrl = internship.source_url ?? "";
+
   return (
     <article className="opportunity-card">
       <div className="card-top">
@@ -15,7 +17,8 @@ function InternshipCard({
         <button
           className={`save-button ${saved ? "saved" : ""}`}
           onClick={() => onToggleSave(internship.id)}
-          aria-label="Save internship"
+          aria-label={saved ? "Unsave internship" : "Save internship"}
+          aria-pressed={saved}
         >
           {saved ? "◆" : "◇"}
         </button>
@@ -52,10 +55,23 @@ function InternshipCard({
         </div>
       </div>
 
-      <button className="card-action">
-        View opportunity
-        <span>→</span>
-      </button>
+      {sourceUrl && (
+        <a
+          className="card-action"
+          href={sourceUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          View opportunity
+          <span>→</span>
+        </a>
+      )}
+
+      {!sourceUrl && (
+        <button className="card-action" disabled>
+          Link unavailable
+        </button>
+      )}
     </article>
   );
 }
