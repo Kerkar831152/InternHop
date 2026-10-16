@@ -13,6 +13,7 @@ class Hackathon(models.Model):
         ONLINE = "online", "Online"
         OFFLINE = "offline", "Offline"
         HYBRID = "hybrid", "Hybrid"
+        UNKNOWN = "unknown", "Unknown"
 
     title = models.CharField(max_length=200)
     organizer = models.CharField(max_length=200)
@@ -24,9 +25,8 @@ class Hackathon(models.Model):
     participation_mode = models.CharField(
         max_length=10,
         choices=WorkMode.choices,
-        default=WorkMode.OFFLINE,
+        default=WorkMode.UNKNOWN,
     )
-
     registration_deadline = models.DateField(
         null=True,
         blank=True,

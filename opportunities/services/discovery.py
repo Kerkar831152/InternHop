@@ -11,6 +11,7 @@ from urllib.parse import (
     urlunsplit,
 )
 
+from django.core.serializers import python
 import requests
 from bs4 import BeautifulSoup
 
@@ -30,12 +31,27 @@ HACKATHON_QUERIES = [
 GENERIC_URL_PATTERNS = [
     r"(^|\.)foundit\.in/search/",
     r"(^|\.)internshala\.com/internships/?$",
+    r"(^|\.)internshala\.com/hackathons/?$",
+    r"(^|\.)internshala\.com/competitions/hackathons/?$",
     r"(^|\.)linkedin\.com/jobs/(search|collections)(/|$)",
     r"(^|\.)indeed\.[^/]+/q-",
     r"(^|\.)glassdoor\.[^/]+/Job/",
     r"(^|\.)reddit\.com/",
     r"(^|\.)facebook\.com/",
     r"(^|\.)youtube\.com/",
+    r"(^|\.)devfolio\.co/?$",
+    r"(^|\.)devfolio\.co/hackathons/?$",
+    r"(^|\.)devpost\.com/?$",
+    r"(^|\.)devpost\.com/hackathons/?$",
+    r"(^|\.)unstop\.com/?$",
+    r"(^|\.)unstop\.com/hackathons/?$",
+    r"(^|\.)hackerearth\.com/?$",
+    r"(^|\.)hackerearth\.com/challenges/?$",
+    r"(^|\.)hackerearth\.com/challenges/hackathon/?$",
+    r"(^|\.)reskilll\.com/?$",
+    r"(^|\.)skillvalix\.com/?$",
+    r"(^|\.)skillvalix\.com/hackathons/?$",
+    r"(^|\.)hackindia\.org/?$",
 ]
 
 GENERIC_TITLE_PHRASES = [
@@ -46,19 +62,28 @@ GENERIC_TITLE_PHRASES = [
     "top hackathons",
     "best hackathons",
     "list of hackathons",
+    "upcoming hackathons",
+    "hackathons you can participate in",
     "best websites for internships",
     "internship tips",
+    "internship listings",
+    "browse hackathons",
+    "explore hackathons",
+    "all hackathons",
 ]
 
 CLOSED_TITLE_PHRASES = [
     "registration closed",
+    "registrations closed",
     "applications closed",
     "applications are closed",
     "registration has ended",
+    "registrations have ended",
     "event has ended",
+    "event is over",
     "deadline passed",
+    "registration deadline passed",
 ]
-
 TRACKING_PARAMETERS = {
     "fbclid",
     "gclid",
@@ -453,47 +478,109 @@ def first_value(*values):
 
     return ""
 
-
 def extract_date(value):
     if isinstance(value, dict):
-        value = value.get("startDate") or value.get("endDate") or value.get("value")
+        value = (
+            value.get("startDate")
+            or value.get("endDate")
+            or value.get("value")
+        )
 
     value = safe_text(value)
 
     if not value:
         return None
 
-    candidates = [
-        value,
-        value[:10],
+    patterns = [
+        r"\b(20\d{2})[-/](\d{1,2})[-/](\d{1,2})\b",
+        r"\b([A-Za-z]{3,9})\s+(\d{1,2}),?\s+(20\d{2})\b",
+        r"\b(\d{1,2})\s+([A-Za-z]{3,9})\s+(20\d{2})\b",
     ]
 
-    for candidate in candidates:
-        try:
-            return date.fromisoformat(candidate)
-        except ValueError:
-            pass
+    for index, pattern in enumerate(patterns):
+        match = re.search(pattern, value)
+
+        if not match:
+            continue
 
         try:
-            return datetime.fromisoformat(
-                candidate.replace("Z", "+00:00")
-            ).date()
+            if index == 0:
+                year, month, day = map(int, match.groups())
+                return date(year, month, day)
+
+            if index == 1:
+                month_name, day, year = match.groups()
+            else:
+                day, month_name, year = match.groups()
+
+            for month_format in ("%B", "%b"):
+                try:
+                    month = datetime.strptime(
+                        month_name, month_format
+                    ).month
+                    return date(int(year), month, int(day))
+                except ValueError:
+                    continue
+
         except ValueError:
-            pass
+            continue
 
-    match = re.search(r"\b(20\d{2})[-/](\d{1,2})[-/](\d{1,2})\b", value)
+    try:
+        return date.fromisoformat(value[:10])
+    except ValueError:
+        pass
 
-    if match:
-        try:
-            return date(
-                int(match.group(1)),
-                int(match.group(2)),
-                int(match.group(3)),
-            )
-        except ValueError:
-            pass
+    try:
+        return datetime.fromisoformat(
+            value.replace("Z", "+00:00")
+        ).date()
+    except ValueError:
+        return None
 
-    return None
+def extract_dates_from_text(value):
+    value = safe_text(value)
+
+    if not value:
+        return []
+
+    months = (
+        r"January|February|March|April|May|June|July|August|"
+        r"September|October|November|December|"
+        r"Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec"
+    )
+
+    patterns = [
+        r"\b20\d{2}[-/]\d{1,2}[-/]\d{1,2}\b",
+        rf"\b(?:{months})\s+\d{{1,2}}(?:,?\s+20\d{{2}})?\b",
+        rf"\b\d{{1,2}}\s+(?:{months})(?:\s+20\d{{2}})?\b",
+    ]
+
+    matches = []
+
+    for pattern in patterns:
+        matches.extend(
+            re.finditer(pattern, value, re.IGNORECASE)
+        )
+
+    matches.sort(key=lambda match: match.start())
+
+    year_match = re.search(r"\b(20\d{2})\b", value)
+    default_year = year_match.group(1) if year_match else None
+
+    dates = []
+
+    for match in matches:
+        date_text = match.group(0)
+
+        parsed = extract_date(date_text)
+
+        if parsed is None and default_year:
+            parsed = extract_date(f"{date_text}, {default_year}")
+
+        if parsed is not None and parsed not in dates:
+            dates.append(parsed)
+
+    return sorted(dates)
 
 
 def extract_page_details(html, page_url, fallback_title="", fallback_description=""):
@@ -595,7 +682,13 @@ def extract_page_details(html, page_url, fallback_title="", fallback_description
             location = first_value(obj.get("location"), location)
             start_date = extract_date(obj.get("startDate")) or start_date
             end_date = extract_date(obj.get("endDate")) or end_date
-            event_type = first_value(obj.get("eventAttendanceMode"), event_type)
+            attendance_mode = str(obj.get("eventAttendanceMode") or "").lower()
+            if "onlineeventattendance" in attendance_mode:
+                participation_mode = "online"
+            elif "mixedeventattendance" in attendance_mode:
+                participation_mode = "hybrid"
+            elif "offlineeventattendance" in attendance_mode:
+                participation_mode = "offline"
 
         if not company:
             company = first_value(obj.get("hiringOrganization"))
@@ -679,19 +772,44 @@ def extract_page_details(html, page_url, fallback_title="", fallback_description
             participation_mode = "hybrid"
         elif re.search(r"\bin[- ]person\b|\bon[- ]site\b", text, re.IGNORECASE):
             participation_mode = "offline"
+   
+
+    date_pattern = (
+        r"([A-Za-z]{3,9}\s+\d{1,2},?\s+20\d{2}"
+        r"|\d{1,2}\s+[A-Za-z]{3,9}\s+20\d{2}"
+        r"|20\d{2}[-/]\d{1,2}[-/]\d{1,2})"
+    )
 
     if not registration_deadline:
         for pattern in (
-            r"(?:registration deadline|register by|last date to register)\s*[:\-]?\s*"
-            r"([A-Za-z]+\s+\d{1,2},?\s+20\d{2}|\d{4}-\d{2}-\d{2})",
-            r"(?:registration closes|registration ends)\s*[:\-]?\s*"
-            r"([A-Za-z]+\s+\d{1,2},?\s+20\d{2}|\d{4}-\d{2}-\d{2})",
+            r"(?:registration deadline|register by|last date to register|"
+            r"last date to apply|application deadline|apply by|"
+            r"registration closes|registration ends|applications close)"
+            r"\s*[:\-]?\s*" + date_pattern,
         ):
             match = re.search(pattern, text, re.IGNORECASE)
             if match:
-                registration_deadline = extract_date(match.group(1))
+                registration_deadline = extract_date(match.group(0).strip())
                 if registration_deadline:
                     break
+
+    if not start_date or not end_date:
+        event_match = re.search(
+            r"(?:hackathon dates|event dates|event schedule|event period|"
+            r"event date|starts on|start date|event starts)"
+            r"\s*[:\-]?\s*(.{0,180})",
+            text,
+            re.IGNORECASE,
+        )
+
+        if event_match:
+            event_dates = extract_dates_from_text(event_match.group(1))
+            if event_dates:
+                start_date = start_date or event_dates[0]
+                if len(event_dates) > 1:
+                    end_date = end_date or event_dates[-1]
+                else:
+                    end_date = end_date or event_dates[0]
 
     if not deadline:
         deadline = registration_deadline
