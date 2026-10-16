@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   getHackathons,
+  getSavedOpportunities,
+  toggleSavedOpportunity,
   deleteHackathon,
   type HackathonRecord,
 } from "../../api";
@@ -49,6 +51,30 @@ function Hackathons({ isAdmin }: HackathonsProps) {
     };
   }, []);
 
+  useEffect(() => {
+  let active = true;
+
+  getSavedOpportunities()
+    .then((items) => {
+      if (active) {
+        setSaved(
+          items
+            .filter((item) => item.type === "hackathon")
+            .map((item) => item.opportunity_id)
+        );
+      }
+    })
+    .catch(() => {
+      if (active) {
+        setSaved([]);
+      }
+    });
+
+  return () => {
+    active = false;
+  };
+}, []);
+
   const filteredHackathons = useMemo(() => {
     return hackathons.filter((hackathon) => {
       const query = search.toLowerCase();
@@ -74,13 +100,25 @@ function Hackathons({ isAdmin }: HackathonsProps) {
     });
   }, [hackathons, search, location, type]);
 
-  const toggleSave = (id: number) => {
+ const toggleSave = async (id: number) => {
+  try {
+    const result = await toggleSavedOpportunity("hackathon", id);
+
     setSaved((current) =>
-      current.includes(id)
-        ? current.filter((savedId) => savedId !== id)
-        : [...current, id]
+      result.saved
+        ? current.includes(id)
+          ? current
+          : [...current, id]
+        : current.filter((savedId) => savedId !== id)
     );
-  };
+  } catch (err) {
+    alert(
+      err instanceof Error
+        ? err.message
+        : "Failed to update saved hackathon."
+    );
+  }
+};
 
   const handleDelete = async (id: number) => {
   if (!window.confirm("Are you sure you want to delete this hackathon?")) {

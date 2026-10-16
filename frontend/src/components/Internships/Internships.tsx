@@ -1,8 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
-import { getInternships, type InternshipRecord } from "../../api";
+import {
+  getInternships,
+  getSavedOpportunities,
+  toggleSavedOpportunity,
+  deleteInternship,
+  type InternshipRecord,
+} from "../../api";
 import InternshipCard from "./InternshipCard";
 import InternshipFilters from "./InternshipFilters";
-import { deleteInternship } from "../../api";
 
 
 interface InternshipsProps {
@@ -46,6 +51,30 @@ function Internships({ isAdmin }: InternshipsProps) {
     };
   }, []);
 
+  useEffect(() => {
+  let active = true;
+
+  getSavedOpportunities()
+    .then((items) => {
+      if (active) {
+        setSaved(
+          items
+            .filter((item) => item.type === "internship")
+            .map((item) => item.opportunity_id)
+        );
+      }
+    })
+    .catch(() => {
+      if (active) {
+        setSaved([]);
+      }
+    });
+
+  return () => {
+    active = false;
+  };
+}, []);
+
   const filteredInternships = useMemo(() => {
     return internships.filter((internship) => {
       const query = search.toLowerCase();
@@ -74,14 +103,25 @@ function Internships({ isAdmin }: InternshipsProps) {
     });
   }, [internships, search, location, type]);
 
-  const toggleSave = (id: number) => {
-    setSaved((current) =>
-      current.includes(id)
-        ? current.filter((savedId) => savedId !== id)
-        : [...current, id]
-    );
-  };
+ const toggleSave = async (id: number) => {
+  try {
+    const result = await toggleSavedOpportunity("internship", id);
 
+    setSaved((current) =>
+      result.saved
+        ? current.includes(id)
+          ? current
+          : [...current, id]
+        : current.filter((savedId) => savedId !== id)
+    );
+  } catch (err) {
+    alert(
+      err instanceof Error
+        ? err.message
+        : "Failed to update saved internship."
+    );
+  }
+};
   const handleDelete = async (id: number) => {
   if (!window.confirm("Are you sure you want to delete this internship?")) {
     return;

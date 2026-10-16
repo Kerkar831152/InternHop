@@ -39,6 +39,40 @@ export interface HackathonRecord {
     status: string;
 }
 
+export interface SavedOpportunityRecord {
+    id: number;
+    type: "internship" | "hackathon";
+    opportunity_id: number;
+}
+
+export async function getSavedOpportunities(): Promise<SavedOpportunityRecord[]> {
+    const data = await apiRequest<{
+        saved_opportunities: SavedOpportunityRecord[];
+    }>("/accounts/saved/");
+
+    return data.saved_opportunities;
+}
+
+export async function toggleSavedOpportunity(
+    type: "internship" | "hackathon",
+    opportunityId: number,
+): Promise<{
+    saved: boolean;
+    type: "internship" | "hackathon";
+    opportunity_id: number;
+}> {
+    return apiRequest("/accounts/saved/toggle/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            type,
+            opportunity_id: opportunityId,
+        }),
+    });
+}
+
 function getCsrfToken(): string | null {
     const csrfCookie = document.cookie
         .split("; ")
