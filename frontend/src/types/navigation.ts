@@ -1,4 +1,4 @@
-export type Page = "home" | "login" | "register" | "admin";
+export type Page = "home" | "login" | "register" | "admin" | "saved";
 
 export interface NavbarProps {
     isAuthenticated: boolean;

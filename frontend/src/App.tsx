@@ -16,7 +16,7 @@ import Footer from "./components/Footer/Footer";
 import Register from "./components/Pages/Register";
 import Login from "./components/Pages/Login";
 import AdminDashboard from "./components/Pages/AdminDashboard";
-
+import SavedOpportunities from "./components/SavedOpportunities/SavedOpportunities";
 import type { Page } from "./types/navigation";
 
 interface CurrentUserResponse {
@@ -130,6 +130,9 @@ function App() {
 
                 {page === "admin" && isAdmin && (
                     <AdminDashboard />
+                )}
+                {page === "saved" && isAuthenticated && (
+                    <SavedOpportunities />
                 )}
             </main>
 
