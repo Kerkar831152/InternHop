@@ -1,4 +1,3 @@
-
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
 from django.db import models
@@ -58,3 +57,21 @@ class SavedOpportunity(models.Model):
     def __str__(self):
         opportunity = self.internship or self.hackathon
         return f"{self.user.username} - {opportunity}"
+
+
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="profile",
+    )
+    degree = models.CharField(max_length=100, blank=True)
+    study_year = models.PositiveSmallIntegerField(null=True, blank=True)
+    skills = models.JSONField(default=list, blank=True)
+    preferred_roles = models.JSONField(default=list, blank=True)
+    preferred_locations = models.JSONField(default=list, blank=True)
+    work_mode = models.CharField(max_length=20, blank=True)
+
+    def __str__(self):
+        return f"{self.user.username}'s profile"

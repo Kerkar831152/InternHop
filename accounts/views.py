@@ -5,6 +5,8 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET, require_POST
 from django.views.decorators.csrf import ensure_csrf_cookie
+from django.views.decorators.csrf import csrf_protect
+from .models import UserProfile
 
 User = get_user_model()
 
@@ -179,3 +181,92 @@ def current_user(request):
 @ensure_csrf_cookie
 def csrf_token(request):
     return JsonResponse({"message": "CSRF cookie set."})
+
+
+@login_required
+@require_GET
+def get_profile(request):
+    profile, _ = UserProfile.objects.get_or_create(user=request.user)
+
+    return JsonResponse({
+        "profile": {
+            "degree": profile.degree,
+            "study_year": profile.study_year,
+            "skills": profile.skills,
+            "preferred_roles": profile.preferred_roles,
+            "preferred_locations": profile.preferred_locations,
+            "work_mode": profile.work_mode,
+        }
+    })
+
+
+@login_required
+@require_POST
+@csrf_protect
+def update_profile(request):
+    data = parse_json_body(request)
+
+    if not isinstance(data, dict):
+        return JsonResponse(
+            {"error": "Invalid JSON body."},
+            status=400,
+        )
+
+    profile, _ = UserProfile.objects.get_or_create(user=request.user)
+
+    fields = {
+        "degree": str,
+        "study_year": int,
+        "skills": list,
+        "preferred_roles": list,
+        "preferred_locations": list,
+        "work_mode": str,
+    }
+
+    for field, expected_type in fields.items():
+        if field not in data:
+            continue
+
+        value = data[field]
+
+        if field == "study_year":
+            if isinstance(value, bool) or not isinstance(value, int) or value not in (1, 2, 3, 4, 5, 6):
+                return JsonResponse(
+                    {"error": "Study year must be between 1 and 6."},
+                    status=400,
+                )
+        elif not isinstance(value, expected_type):
+            return JsonResponse(
+                {"error": f"Invalid value for {field}."},
+                status=400,
+            )
+
+        if field in ("skills", "preferred_roles", "preferred_locations"):
+            if not all(isinstance(item, str) for item in value):
+                return JsonResponse(
+                    {"error": f"All items in {field} must be strings."},
+                    status=400,
+                )
+            value = [item.strip() for item in value if item.strip()]
+
+        if field == "work_mode" and value not in ("", "remote", "onsite", "hybrid"):
+            return JsonResponse(
+                {"error": "Invalid work mode."},
+                status=400,
+            )
+
+        setattr(profile, field, value)
+
+    profile.save()
+
+    return JsonResponse({
+        "message": "Profile updated successfully.",
+        "profile": {
+            "degree": profile.degree,
+            "study_year": profile.study_year,
+            "skills": profile.skills,
+            "preferred_roles": profile.preferred_roles,
+            "preferred_locations": profile.preferred_locations,
+            "work_mode": profile.work_mode,
+        },
+    })

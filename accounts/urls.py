@@ -12,4 +12,6 @@ urlpatterns = [
     path("csrf/", views.csrf_token, name="csrf_token"),
     path("saved/",saved_views.saved_opportunities,name="saved_opportunities",),
     path("saved/toggle/",saved_views.toggle_saved_opportunity,name="toggle_saved_opportunity",),
+    path("profile/", views.get_profile, name="get_profile"),
+    path("profile/update/", views.update_profile, name="update_profile"),
 ]

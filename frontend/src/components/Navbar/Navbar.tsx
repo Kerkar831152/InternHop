@@ -49,10 +49,6 @@ function Navbar({
                     Hackathons
                 </a>
 
-                {isAuthenticated && (
-                    <a href="#saved" onClick={() => onNavigate("saved")}>Saved</a>
-                )}
-
                 <a href="#verify" onClick={() => onNavigate("home")}>
                     Verify
                 </a>
@@ -89,9 +85,10 @@ function Navbar({
                         />
 
                         <Profile
-                            username={username}
-                            onLogout={onLogout}
-                        />
+                         username={username}
+                         onLogout={onLogout}
+                         onNavigate={onNavigate}
+                         />
                     </>
                 ) : (
                     <div className="auth-nav-actions">

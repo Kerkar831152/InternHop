@@ -1,8 +1,12 @@
 import { useState } from "react";
+import type { Page } from "../../types/navigation";
 
-import type { ProfileProps } from "../../types/profile";
-
-function Profile({ username, onLogout }: ProfileProps) {
+export interface ProfileProps {
+    username: string;
+    onLogout: () => void;
+    onNavigate: (page: Page) => void;
+}
+function Profile({ username, onLogout, onNavigate }: ProfileProps) {
     const [open, setOpen] = useState(false);
 
     const initials = username
@@ -58,7 +62,10 @@ function Profile({ username, onLogout }: ProfileProps) {
                         </button>
 
                         <button
-                            onClick={() => setOpen(false)}
+                            onClick={() => {
+                                setOpen(false);
+                                onNavigate("saved");
+                            }}
                         >
                             <span>🔖</span>
                             <span>Saved Opportunities</span>
