@@ -397,3 +397,218 @@
         transition: none;
     }
 }
+
+.admin-dashboard {
+    width: min(1160px, calc(100% - 48px));
+    padding: 38px 0 64px;
+    color: #172744;
+}
+
+.admin-dashboard-header {
+    max-width: none;
+    margin-bottom: 34px;
+    padding: clamp(24px, 4vw, 36px);
+    border: 1px solid #dfe7f3;
+    border-radius: 18px;
+    background: linear-gradient(120deg, #ffffff 12%, #f3f6ff 100%);
+    box-shadow: 0 12px 30px rgba(38, 59, 105, 0.06);
+}
+
+.admin-eyebrow,
+.admin-section-label {
+    color: #536bd2;
+    font-size: 10px;
+    letter-spacing: 0.13em;
+}
+
+.admin-dashboard-header h1 {
+    margin-top: 9px;
+    color: #172744;
+    font-size: clamp(30px, 4vw, 40px);
+    line-height: 1.12;
+    letter-spacing: -0.04em;
+}
+
+.admin-dashboard-header > p {
+    margin-top: 11px;
+    color: #566782;
+    font-size: 14px;
+    line-height: 1.65;
+}
+
+.admin-section-heading {
+    margin-bottom: 16px;
+}
+
+.admin-section-heading h2 {
+    margin-top: 5px;
+    color: #203251;
+    font-size: 21px;
+}
+
+.admin-section-heading > p {
+    color: #64738c;
+    font-size: 12px;
+}
+
+.admin-discovery-actions {
+    gap: 14px;
+}
+
+.admin-action-card {
+    min-height: 248px;
+    padding: 21px;
+    border-color: #dfe6f1;
+    border-radius: 14px;
+    background: #ffffff;
+    box-shadow: 0 6px 18px rgba(38, 59, 105, 0.055);
+}
+
+.admin-action-card:hover {
+    transform: translateY(-2px);
+    border-color: #bdcafa;
+    box-shadow: 0 12px 25px rgba(38, 59, 105, 0.1);
+}
+
+.admin-action-card-featured {
+    border-color: #cdd8fb;
+    background: linear-gradient(145deg, #f1f4ff, #ffffff 72%);
+}
+
+.admin-action-icon {
+    color: #4161df;
+    border-color: #dce4ff;
+    background: #edf1ff;
+}
+
+.admin-recommended {
+    color: #4057c2;
+    border-color: #dce4ff;
+    background: #f2f5ff;
+}
+
+.admin-action-copy {
+    margin: 21px 0 18px;
+}
+
+.admin-action-copy h3 {
+    color: #203251;
+    font-size: 16px;
+}
+
+.admin-action-copy p {
+    color: #5b6b85;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.admin-action-button {
+    min-height: 40px;
+    padding: 0 13px;
+    color: #ffffff;
+    background: #4161df;
+    border-color: #4161df;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(65, 97, 223, 0.15);
+    cursor: pointer;
+}
+
+.admin-action-button:hover:not(:disabled) {
+    background: #344fc4;
+    border-color: #344fc4;
+    box-shadow: 0 6px 14px rgba(65, 97, 223, 0.2);
+}
+
+.admin-action-button:focus-visible {
+    outline-color: rgba(65, 97, 223, 0.32);
+}
+
+.admin-action-button:disabled {
+    color: #52618a;
+    background: #e8ecf8;
+    border-color: #e8ecf8;
+    opacity: 1;
+}
+
+.admin-state,
+.admin-result {
+    padding: 20px 22px;
+    border-color: #dfe6f1;
+    border-radius: 12px;
+    background: #ffffff;
+    box-shadow: 0 6px 18px rgba(38, 59, 105, 0.05);
+}
+
+.admin-state h2,
+.admin-result-heading h2 {
+    color: #203251;
+}
+
+.admin-state p,
+.admin-result-note {
+    color: #566782;
+}
+
+.admin-loading {
+    border-color: #d6def8;
+    background: #f8f9ff;
+}
+
+.admin-spinner {
+    border-color: #dfe5fa;
+    border-top-color: #4161df;
+}
+
+.admin-result {
+    border-color: #cfe6dc;
+    background: #fbfefc;
+}
+
+.admin-success-mark {
+    color: #16724e;
+    background: #e6f5ed;
+}
+
+.admin-result-card {
+    border-color: #e0e7f1;
+    border-radius: 10px;
+    background: #ffffff;
+}
+
+.admin-result-card-heading h3 {
+    color: #263754;
+}
+
+.admin-result-status {
+    color: #16724e;
+    background: #e8f6ee;
+}
+
+.admin-counts dt {
+    color: #63728a;
+}
+
+.admin-counts dd {
+    color: #203251;
+    font-size: 20px;
+}
+
+@media (max-width: 560px) {
+    .admin-dashboard {
+        width: calc(100% - 28px);
+        padding-top: 24px;
+        padding-bottom: 42px;
+    }
+
+    .admin-dashboard-header {
+        margin-bottom: 26px;
+        padding: 22px 19px;
+        border-radius: 14px;
+    }
+
+    .admin-action-card,
+    .admin-action-card:last-child {
+        min-height: 225px;
+        padding: 18px;
+    }
+}

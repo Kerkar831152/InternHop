@@ -2470,8 +2470,8 @@ a {
   }
 
   .hero-visual {
-    right: -70px;
-    opacity: 0.55;
+    right: auto;
+    opacity: 1;
   }
 
   .opportunity-grid {
@@ -2511,8 +2511,8 @@ a {
   }
 
   .hero-visual {
-    right: -210px;
-    opacity: 0.25;
+    right: auto;
+    opacity: 1;
   }
 
   .hero-content h1 {
@@ -3185,6 +3185,64 @@ a {
     }
 }
 
+/* Final readability and control states */
+body {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+.register-container .auth-form-field input {
+    border-color: #d8e1ef;
+    background-color: #ffffff;
+    color: #203251;
+    caret-color: #4161df;
+    -webkit-text-fill-color: #203251;
+    transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+}
+
+.register-container .auth-form-field input:hover {
+    border-color: #b9c7e0;
+}
+
+.register-container .auth-form-field input:focus {
+    border-color: #7186e8;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(65, 97, 223, 0.12);
+    outline: none;
+}
+
+.register-container .auth-form-field input:-webkit-autofill,
+.register-container .auth-form-field input:-webkit-autofill:hover,
+.register-container .auth-form-field input:-webkit-autofill:focus,
+.register-container .auth-form-field input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px #ffffff inset;
+    -webkit-text-fill-color: #203251;
+    caret-color: #4161df;
+}
+
+.register-container .auth-form-field input:autofill {
+    box-shadow: 0 0 0 1000px #ffffff inset;
+    color: #203251;
+}
+
+.auth-heading p,
+.auth-form-field label,
+.auth-switch,
+.filter-bar,
+.card-meta,
+.opportunity-details p,
+.recommendations-header p,
+.recommendation-card p,
+.saved-opportunities .saved-card p {
+    color: #52627c;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .opportunity-card .card-action {
+        transition: none;
+    }
+}
+
 /* Compact account pages and navbar branding */
 .navbar > .logo {
     display: inline-flex;
@@ -3502,15 +3560,53 @@ a {
 }
 
 .opportunity-card .card-action {
-    height: 30px;
-    margin-top: 9px;
-    border-radius: 7px;
-    background: rgba(255, 255, 255, 0.028);
+    display: flex;
+    width: 100%;
+    min-height: 40px;
+    height: auto;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    margin-top: auto;
+    padding: 9px 12px;
+    border: 1px solid #4161df;
+    border-radius: 8px;
+    background: #4161df;
+    box-shadow: 0 4px 10px rgba(65, 97, 223, 0.14);
+    color: #ffffff;
+    -webkit-text-fill-color: #ffffff;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.3;
+    text-align: center;
+    text-decoration: none;
+    visibility: visible;
+    opacity: 1;
+    transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
 }
 
-.hackathon-card .card-action:hover {
-    border-color: rgba(165, 148, 255, 0.38);
-    color: #b6adff;
+.opportunity-card .card-action:hover:not(:disabled),
+.opportunity-card.hackathon-card .card-action:hover:not(:disabled) {
+    border-color: #344fc4;
+    background: #344fc4;
+    box-shadow: 0 6px 14px rgba(65, 97, 223, 0.22);
+    color: #ffffff;
+    -webkit-text-fill-color: #ffffff;
+    transform: translateY(-1px);
+}
+
+.opportunity-card .card-action:focus-visible {
+    outline: 3px solid rgba(65, 97, 223, 0.28);
+    outline-offset: 3px;
+}
+
+.opportunity-card .card-action:disabled {
+    border-color: #e3e7f0;
+    background: #f0f2f7;
+    box-shadow: none;
+    color: #68758b;
+    -webkit-text-fill-color: #68758b;
+    cursor: not-allowed;
 }
 
 .opportunity-grid {
@@ -4380,9 +4476,9 @@ textarea:focus-visible {
     padding: 0 max(24px, calc((100vw - 1240px) / 2));
     gap: 20px;
     border-bottom: 1px solid var(--border-subtle);
-    background: rgba(255, 255, 255, 0.96);
+    background: #ffffff;
     box-shadow: 0 2px 10px rgba(27, 47, 87, 0.035);
-    backdrop-filter: blur(16px);
+    backdrop-filter: none;
 }
 
 .navbar .logo {
@@ -4605,8 +4701,8 @@ textarea:focus-visible {
     padding: clamp(30px, 5vw, 58px);
     border: 1px solid var(--border-subtle);
     border-radius: 18px;
-    background: linear-gradient(115deg, #ffffff 0%, #ffffff 56%, #f1f4ff 100%);
-    box-shadow: 0 14px 38px rgba(36, 54, 95, 0.06);
+    background: #ffffff;
+    box-shadow: 0 14px 38px rgba(36, 54, 95, 0.075);
 }
 
 .hero-content {
@@ -4694,14 +4790,14 @@ textarea:focus-visible {
 
 .home-feature-panel {
     padding: 27px;
-    border: 1px solid #e0e6f5;
+    border: 1px solid #dce4f2;
     border-radius: 14px;
-    background: rgba(255, 255, 255, 0.82);
-    box-shadow: 0 12px 30px rgba(42, 58, 100, 0.07);
+    background: #ffffff;
+    box-shadow: 0 10px 26px rgba(31, 52, 96, 0.08);
 }
 
 .home-feature-eyebrow {
-    color: #6879a2;
+    color: #52658c;
     font-size: 10px;
     font-weight: 700;
     letter-spacing: 0.1em;
@@ -4710,7 +4806,7 @@ textarea:focus-visible {
 
 .home-feature-panel h2 {
     margin: 10px 0 19px;
-    color: #1a2948;
+    color: #172744;
     font-size: 22px;
     line-height: 1.3;
     letter-spacing: -0.025em;
@@ -4726,7 +4822,7 @@ textarea:focus-visible {
     align-items: flex-start;
     gap: 11px;
     padding-top: 12px;
-    border-top: 1px solid #edf0f6;
+    border-top: 1px solid #e6ebf3;
 }
 
 .home-feature-list > div > span {
@@ -4736,20 +4832,20 @@ textarea:focus-visible {
     flex: 0 0 auto;
     place-items: center;
     border-radius: 7px;
-    background: #eef1ff;
-    color: #465be8;
+    background: #e9efff;
+    color: #3857d2;
     font-size: 10px;
     font-weight: 700;
 }
 
 .home-feature-list p {
-    color: #64718a;
+    color: #53627b;
     font-size: 12px;
     line-height: 1.55;
 }
 
 .home-feature-list strong {
-    color: #2a3957;
+    color: #22324f;
 }
 
 .section {
@@ -5030,16 +5126,51 @@ textarea:focus-visible {
     border: 1px solid #e1e8f2;
     border-radius: 12px;
     background: #ffffff;
-    box-shadow: 0 5px 16px rgba(32, 50, 88, 0.045);
+    box-shadow: 0 6px 18px rgba(32, 50, 88, 0.065);
+}
+
+.about-number {
+    color: #66748c;
+    font-size: 10px;
+    font-weight: 650;
+}
+
+.about-icon {
+    border: 1px solid #dfe6ff;
+    border-radius: 8px;
+    background: #eef2ff;
+    color: #4161df;
 }
 
 .about-card h3 {
-    color: #1f2e4b;
+    color: #1d2b47;
+    font-size: 16px;
 }
 
-.about-card p,
+.about-card p {
+    color: #53627b;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.about-bottom {
+    border-color: #dfe6f0;
+}
+
 .about-bottom p {
-    color: #697790;
+    color: #53627b;
+    font-size: 12px;
+}
+
+.about-bottom span {
+    color: #4161df;
+    font-size: 9px;
+}
+
+.about-bottom strong {
+    color: #203251;
+    font-size: 16px;
+    font-weight: 650;
 }
 
 .about-icon {
@@ -5239,6 +5370,68 @@ textarea:focus-visible {
 .profile-form-group small,
 .profile-page-status {
     color: #718098;
+}
+
+.opportunity-card .card-top-actions .save-button {
+    width: 36px;
+    height: 36px;
+    border: 1px solid #d6def7;
+    border-radius: 9px;
+    background: #f5f7ff;
+    color: #4961ce;
+    font-size: 16px;
+    font-weight: 700;
+    transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.opportunity-card .card-top-actions .save-button:hover {
+    border-color: #aebcf1;
+    background: #edf1ff;
+    color: #354fc4;
+    transform: translateY(-1px);
+}
+
+.opportunity-card .card-top-actions .save-button.saved {
+    border-color: #4161df;
+    background: #4161df;
+    color: #ffffff;
+    box-shadow: 0 4px 10px rgba(65, 97, 223, 0.18);
+}
+
+.opportunity-card .card-top-actions .save-button:focus-visible,
+.opportunity-card .card-top-actions .delete-button:focus-visible {
+    outline: 3px solid rgba(65, 97, 223, 0.26);
+    outline-offset: 2px;
+}
+
+.opportunity-card .card-top-actions .delete-button {
+    min-height: 36px;
+    padding: 0 11px;
+    border: 1px solid #d6def7;
+    border-radius: 9px;
+    background: #f5f7ff;
+    color: #4961ce;
+    font-size: 11px;
+    font-weight: 650;
+    transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.opportunity-card .card-top-actions .delete-button:hover {
+    border-color: #aebcf1;
+    background: #edf1ff;
+    color: #354fc4;
+    box-shadow: 0 3px 9px rgba(65, 97, 223, 0.12);
+    transform: translateY(-1px);
+}
+
+.profile-form-success {
+    border: 1px solid #cbd8ff;
+    background: #eef2ff;
+    color: #344fc4;
+}
+
+.profile-page-status {
+    color: #5b6a84;
 }
 
 .profile-save-btn {
@@ -6590,4 +6783,51 @@ textarea:focus-visible {
         flex-direction: column;
         gap: 5px;
     }
+}
+
+.opportunity-card.hackathon-card,
+.opportunity-card.hackathon-card:hover {
+    min-height: 350px;
+    border-color: #e0e7f1;
+    background: #ffffff;
+    box-shadow: 0 5px 16px rgba(32, 50, 88, 0.045);
+}
+
+.opportunity-card.hackathon-card:hover {
+    transform: translateY(-2px);
+    border-color: #c8d1f2;
+    box-shadow: 0 12px 26px rgba(32, 50, 88, 0.09);
+}
+
+.opportunity-card.hackathon-card .hackathon-logo {
+    border-color: #dce4fb;
+    background: #eef2ff;
+    color: #4161df;
+}
+
+.opportunity-card.hackathon-card .card-company {
+    color: #5268a1;
+}
+
+.opportunity-card.hackathon-card .card-meta {
+    color: #596983;
+    font-size: 11px;
+}
+
+.opportunity-card.hackathon-card .skill-list span {
+    border: 1px solid #e1e7f2;
+    background: #f3f6fc;
+    color: #52617a;
+    font-size: 10px;
+}
+
+.opportunity-card.hackathon-card .card-bottom small {
+    color: #6d7c94;
+    font-size: 9px;
+}
+
+.opportunity-card.hackathon-card .card-bottom strong,
+.opportunity-card.hackathon-card .deadline strong {
+    color: #2f405f;
+    font-size: 12px;
 }

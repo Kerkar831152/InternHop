@@ -1,3 +1,4 @@
+
 import json
 import re
 from datetime import date, datetime
@@ -6,52 +7,56 @@ from urllib.parse import (
     parse_qsl,
     urlencode,
     urldefrag,
-    urljoin,
     urlsplit,
     urlunsplit,
 )
 
-from django.core.serializers import python
 import requests
 from bs4 import BeautifulSoup
 
 from .serpapi import search_google
 
 
+CURRENT_YEAR = date.today().year
+
 INTERNSHIP_QUERIES = [
-    "software engineering internship India students",
-    "computer science internship applications open",
+    f"site:unstop.com/internships software engineering internship India {CURRENT_YEAR}",
+    f"site:internshala.com/internship software developer internship India {CURRENT_YEAR}",
+    f"site:linkedin.com/jobs/view software engineering internship India {CURRENT_YEAR}",
+    f"software engineering internship India students applications open {CURRENT_YEAR}",
 ]
 
 HACKATHON_QUERIES = [
-    "upcoming hackathons India students registration",
-    "online hackathons accepting registrations",
+    f"site:unstop.com hackathon students registration {CURRENT_YEAR}",
+    f"site:devpost.com hackathons {CURRENT_YEAR} registration",
+    f"site:devfolio.co hackathon registration {CURRENT_YEAR}",
+    f"site:hackerearth.com/challenges hackathon registration {CURRENT_YEAR}",
+    f"student hackathon India registration open {CURRENT_YEAR}",
+    f"online hackathon students registration open {CURRENT_YEAR}",
 ]
+
+TRUSTED_HACKATHON_DOMAINS = {
+    "unstop.com": 5,
+    "devpost.com": 5,
+    "devfolio.co": 5,
+    "hackerearth.com": 4,
+    "reskilll.com": 3,
+}
+
+TRUSTED_INTERNSHIP_DOMAINS = {
+    "unstop.com": 5,
+    "internshala.com": 5,
+    "linkedin.com": 3,
+}
 
 GENERIC_URL_PATTERNS = [
     r"(^|\.)foundit\.in/search/",
-    r"(^|\.)internshala\.com/internships/?$",
-    r"(^|\.)internshala\.com/hackathons/?$",
-    r"(^|\.)internshala\.com/competitions/hackathons/?$",
     r"(^|\.)linkedin\.com/jobs/(search|collections)(/|$)",
     r"(^|\.)indeed\.[^/]+/q-",
     r"(^|\.)glassdoor\.[^/]+/Job/",
     r"(^|\.)reddit\.com/",
     r"(^|\.)facebook\.com/",
     r"(^|\.)youtube\.com/",
-    r"(^|\.)devfolio\.co/?$",
-    r"(^|\.)devfolio\.co/hackathons/?$",
-    r"(^|\.)devpost\.com/?$",
-    r"(^|\.)devpost\.com/hackathons/?$",
-    r"(^|\.)unstop\.com/?$",
-    r"(^|\.)unstop\.com/hackathons/?$",
-    r"(^|\.)hackerearth\.com/?$",
-    r"(^|\.)hackerearth\.com/challenges/?$",
-    r"(^|\.)hackerearth\.com/challenges/hackathon/?$",
-    r"(^|\.)reskilll\.com/?$",
-    r"(^|\.)skillvalix\.com/?$",
-    r"(^|\.)skillvalix\.com/hackathons/?$",
-    r"(^|\.)hackindia\.org/?$",
 ]
 
 GENERIC_TITLE_PHRASES = [
@@ -62,7 +67,6 @@ GENERIC_TITLE_PHRASES = [
     "top hackathons",
     "best hackathons",
     "list of hackathons",
-    "upcoming hackathons",
     "hackathons you can participate in",
     "best websites for internships",
     "internship tips",
@@ -84,6 +88,7 @@ CLOSED_TITLE_PHRASES = [
     "deadline passed",
     "registration deadline passed",
 ]
+
 TRACKING_PARAMETERS = {
     "fbclid",
     "gclid",
@@ -128,12 +133,28 @@ def as_list(value):
     else:
         return []
 
-    return [text for item in values if (text := safe_text(item))]
+    output = []
+
+    for item in values:
+        if isinstance(item, dict):
+            item = item.get("name") or item.get("value")
+
+        text = safe_text(item)
+
+        if text:
+            output.append(text)
+
+    return output
 
 
 def clean_query_value(value):
     value = safe_text(value)
-    return re.sub(r"\s+", " ", re.sub(r"[^\w\s.+#/-]", " ", value)).strip()
+
+    return re.sub(
+        r"\s+",
+        " ",
+        re.sub(r"[^\w\s.+#/-]", " ", value),
+    ).strip()
 
 
 def unique_strings(values):
@@ -157,6 +178,7 @@ def get_profile_values(profile, *keys):
 
     for key in keys:
         values = as_list(profile.get(key))
+
         if values:
             return values
 
@@ -167,24 +189,44 @@ def build_internship_queries(profile=None):
     queries = list(INTERNSHIP_QUERIES)
 
     skills = get_profile_values(profile, "skills")
-    roles = get_profile_values(profile, "preferred_roles", "roles", "interests")
-    locations = get_profile_values(profile, "locations", "location", "preferred_location")
-    course = get_profile_values(profile, "course", "degree", "field_of_study")
-    year = get_profile_values(profile, "year_of_study", "study_year", "year")
+    roles = get_profile_values(
+        profile, "preferred_roles", "roles", "interests"
+    )
+    locations = get_profile_values(
+        profile,
+        "preferred_locations",
+        "locations",
+        "location",
+        "preferred_location",
+    )
+    course = get_profile_values(
+        profile, "course", "degree", "field_of_study"
+    )
+    year = get_profile_values(
+        profile, "year_of_study", "study_year", "year"
+    )
 
     if roles:
-        queries.append(f"{roles[0]} internship applications open")
+        queries.append(
+            f"{roles[0]} internship applications open India {CURRENT_YEAR}"
+        )
 
     if skills:
-        queries.append(f"{' '.join(skills[:3])} internship students")
+        queries.append(
+            f"{' '.join(skills[:3])} internship students India {CURRENT_YEAR}"
+        )
 
     if locations:
-        queries.append(f"internship {' '.join(locations[:2])} students")
+        queries.append(
+            f"internship {' '.join(locations[:2])} students"
+        )
 
     if course and year:
-        queries.append(f"{course[0]} year {year[0]} internship")
+        queries.append(
+            f"{course[0]} year {year[0]} internship India {CURRENT_YEAR}"
+        )
 
-    return unique_strings(queries)[:6]
+    return unique_strings(queries)
 
 
 def build_hackathon_queries(profile=None):
@@ -192,20 +234,35 @@ def build_hackathon_queries(profile=None):
 
     skills = get_profile_values(profile, "skills")
     interests = get_profile_values(
-        profile, "preferred_roles", "interests", "fields_of_interest"
+        profile,
+        "preferred_roles",
+        "interests",
+        "fields_of_interest",
     )
-    locations = get_profile_values(profile, "locations", "location", "preferred_location")
+    locations = get_profile_values(
+        profile,
+        "preferred_locations",
+        "locations",
+        "location",
+        "preferred_location",
+    )
 
     if skills:
-        queries.append(f"{' '.join(skills[:3])} hackathon registration")
+        queries.append(
+            f"{' '.join(skills[:3])} hackathon registration {CURRENT_YEAR}"
+        )
 
     if interests:
-        queries.append(f"{interests[0]} hackathon students")
+        queries.append(
+            f"{interests[0]} hackathon students registration {CURRENT_YEAR}"
+        )
 
     if locations:
-        queries.append(f"hackathon {' '.join(locations[:2])} students")
+        queries.append(
+            f"hackathon {' '.join(locations[:2])} students {CURRENT_YEAR}"
+        )
 
-    return unique_strings(queries)[:6]
+    return unique_strings(queries)
 
 
 def normalize_url(url):
@@ -244,7 +301,9 @@ def normalize_url(url):
 
         query_items = [
             (key, value)
-            for key, value in parse_qsl(parsed.query, keep_blank_values=True)
+            for key, value in parse_qsl(
+                parsed.query, keep_blank_values=True
+            )
             if key.casefold() not in TRACKING_PARAMETERS
             and not key.casefold().startswith("utm_")
         ]
@@ -274,19 +333,77 @@ def is_valid_http_url(url):
         return False
 
 
+def get_source_priority(url, opportunity_type="internship"):
+    try:
+        hostname = (
+            urlsplit(url).hostname or ""
+        ).lower().removeprefix("www.")
+    except ValueError:
+        return 0
+
+    priorities = (
+        TRUSTED_HACKATHON_DOMAINS
+        if opportunity_type == "hackathon"
+        else TRUSTED_INTERNSHIP_DOMAINS
+    )
+
+    for domain, priority in priorities.items():
+        if hostname == domain or hostname.endswith("." + domain):
+            return priority
+
+    return 0
+
+
+def is_trusted_source(url, opportunity_type="internship"):
+    """
+    Validate the hostname against the allowlist for the opportunity type.
+    Legitimate subdomains are allowed; lookalike domains are not.
+    """
+    try:
+        parsed = urlsplit(url)
+        hostname = (
+            parsed.hostname or ""
+        ).lower().removeprefix("www.")
+
+        if (
+            parsed.scheme.lower() not in {"http", "https"}
+            or not hostname
+            or "." not in hostname
+            or parsed.username is not None
+            or parsed.password is not None
+        ):
+            return False
+
+        priorities = (
+            TRUSTED_HACKATHON_DOMAINS
+            if opportunity_type == "hackathon"
+            else TRUSTED_INTERNSHIP_DOMAINS
+        )
+
+        return any(
+            hostname == domain or hostname.endswith("." + domain)
+            for domain in priorities
+        )
+
+    except (TypeError, ValueError):
+        return False
+
+
 def has_old_year_without_current_context(result):
-    text = f"{safe_text(result.get('title'))} {safe_text(result.get('snippet'))}"
-    years = [int(year) for year in re.findall(r"\b20\d{2}\b", text)]
+    text = (
+        f"{safe_text(result.get('title'))} "
+        f"{safe_text(result.get('snippet'))}"
+    )
+
+    years = [
+        int(year)
+        for year in re.findall(r"\b20\d{2}\b", text)
+    ]
 
     if not years:
         return False
 
-    current_year = date.today().year
-
-    return (
-        not any(year >= current_year for year in years)
-        and max(years) < current_year - 1
-    )
+    return max(years) < date.today().year - 1
 
 
 def mentions_closed_registration(result):
@@ -295,18 +412,25 @@ def mentions_closed_registration(result):
         f"{safe_text(result.get('snippet'))}"
     ).casefold()
 
-    return any(phrase in text for phrase in CLOSED_TITLE_PHRASES)
+    return any(
+        phrase in text for phrase in CLOSED_TITLE_PHRASES
+    )
 
 
 def is_likely_generic_page(result):
     title = safe_text(result.get("title")).casefold()
-    url = safe_text(result.get("link")).casefold()
+    url = safe_text(result.get("link"))
 
     try:
         parsed = urlsplit(url)
-        hostname = parsed.hostname or ""
-        path = parsed.path
+        hostname = (
+            parsed.hostname or ""
+        ).lower().removeprefix("www.")
+        path = parsed.path.rstrip("/").casefold()
     except ValueError:
+        return True
+
+    if not hostname:
         return True
 
     if any(
@@ -315,7 +439,29 @@ def is_likely_generic_page(result):
     ):
         return True
 
-    if any(phrase in title for phrase in GENERIC_TITLE_PHRASES):
+    full_path = hostname + path
+
+    generic_paths = {
+        "unstop.com",
+        "unstop.com/hackathons",
+        "unstop.com/internships",
+        "devpost.com",
+        "devpost.com/hackathons",
+        "devfolio.co",
+        "devfolio.co/hackathons",
+        "hackerearth.com",
+        "hackerearth.com/challenges",
+        "hackerearth.com/challenges/hackathon",
+        "internshala.com/internships",
+        "internshala.com/hackathons",
+    }
+
+    if full_path in generic_paths:
+        return True
+
+    if any(
+        phrase in title for phrase in GENERIC_TITLE_PHRASES
+    ):
         return True
 
     return has_old_year_without_current_context(result)
@@ -327,7 +473,12 @@ def contains_phrase(text, phrase):
     if not phrase:
         return False
 
-    pattern = r"(?<!\w)" + re.escape(phrase).replace(r"\ ", r"\s+") + r"(?!\w)"
+    pattern = (
+        r"(?<!\w)"
+        + re.escape(phrase).replace(r"\ ", r"\s+")
+        + r"(?!\w)"
+    )
+
     return re.search(pattern, text, re.IGNORECASE) is not None
 
 
@@ -341,13 +492,19 @@ def score_relevance(result, profile=None):
 
     skills = get_profile_values(profile, "skills")
     roles = get_profile_values(
-        profile, "preferred_roles", "roles", "interests", "fields_of_interest"
+        profile, "preferred_roles", "roles", "interests",
+        "fields_of_interest",
     )
     locations = get_profile_values(
-        profile, "locations", "location", "preferred_location"
+        profile, "preferred_locations", "locations",
+        "location", "preferred_location",
     )
-    course = get_profile_values(profile, "course", "degree", "field_of_study")
-    year = get_profile_values(profile, "year_of_study", "study_year", "year")
+    course = get_profile_values(
+        profile, "course", "degree", "field_of_study"
+    )
+    year = get_profile_values(
+        profile, "year_of_study", "study_year", "year"
+    )
 
     score = 0
     matched = []
@@ -397,7 +554,10 @@ def fetch_page(url):
         ) as response:
             response.raise_for_status()
 
-            content_type = response.headers.get("Content-Type", "").lower()
+            content_type = response.headers.get(
+                "Content-Type", ""
+            ).lower()
+
             if "html" not in content_type and "xhtml" not in content_type:
                 return None, response.url
 
@@ -418,9 +578,16 @@ def fetch_page(url):
             content = b"".join(chunks)
             encoding = response.encoding or "utf-8"
 
-            return content.decode(encoding, errors="replace"), response.url
+            return (
+                content.decode(encoding, errors="replace"),
+                response.url,
+            )
 
-    except (requests.RequestException, UnicodeError, ValueError):
+    except (
+        requests.RequestException,
+        UnicodeError,
+        ValueError,
+    ):
         return None, url
 
 
@@ -439,7 +606,9 @@ def flatten_jsonld(value):
 def get_jsonld_objects(soup):
     objects = []
 
-    for script in soup.find_all("script", type="application/ld+json"):
+    for script in soup.find_all(
+        "script", type="application/ld+json"
+    ):
         raw = script.string or script.get_text()
 
         try:
@@ -458,7 +627,9 @@ def schema_types(obj):
         return [value.casefold()]
 
     if isinstance(value, list):
-        return [safe_text(item).casefold() for item in value]
+        return [
+            safe_text(item).casefold() for item in value
+        ]
 
     return []
 
@@ -466,10 +637,26 @@ def schema_types(obj):
 def first_value(*values):
     for value in values:
         if isinstance(value, dict):
-            value = value.get("name") or value.get("value")
+            value = (
+                value.get("name")
+                or value.get("value")
+                or value.get("address")
+            )
 
         if isinstance(value, list):
-            value = ", ".join(safe_text(item) for item in value if safe_text(item))
+            value = ", ".join(
+                safe_text(
+                    item.get("name")
+                    if isinstance(item, dict)
+                    else item
+                )
+                for item in value
+                if safe_text(
+                    item.get("name")
+                    if isinstance(item, dict)
+                    else item
+                )
+            )
 
         text = safe_text(value)
 
@@ -477,6 +664,7 @@ def first_value(*values):
             return text
 
     return ""
+
 
 def extract_date(value):
     if isinstance(value, dict):
@@ -491,40 +679,6 @@ def extract_date(value):
     if not value:
         return None
 
-    patterns = [
-        r"\b(20\d{2})[-/](\d{1,2})[-/](\d{1,2})\b",
-        r"\b([A-Za-z]{3,9})\s+(\d{1,2}),?\s+(20\d{2})\b",
-        r"\b(\d{1,2})\s+([A-Za-z]{3,9})\s+(20\d{2})\b",
-    ]
-
-    for index, pattern in enumerate(patterns):
-        match = re.search(pattern, value)
-
-        if not match:
-            continue
-
-        try:
-            if index == 0:
-                year, month, day = map(int, match.groups())
-                return date(year, month, day)
-
-            if index == 1:
-                month_name, day, year = match.groups()
-            else:
-                day, month_name, year = match.groups()
-
-            for month_format in ("%B", "%b"):
-                try:
-                    month = datetime.strptime(
-                        month_name, month_format
-                    ).month
-                    return date(int(year), month, int(day))
-                except ValueError:
-                    continue
-
-        except ValueError:
-            continue
-
     try:
         return date.fromisoformat(value[:10])
     except ValueError:
@@ -535,7 +689,23 @@ def extract_date(value):
             value.replace("Z", "+00:00")
         ).date()
     except ValueError:
-        return None
+        pass
+
+    formats = (
+        "%B %d, %Y",
+        "%b %d, %Y",
+        "%d %B %Y",
+        "%d %b %Y",
+    )
+
+    for fmt in formats:
+        try:
+            return datetime.strptime(value, fmt).date()
+        except ValueError:
+            continue
+
+    return None
+
 
 def extract_dates_from_text(value):
     value = safe_text(value)
@@ -551,8 +721,8 @@ def extract_dates_from_text(value):
 
     patterns = [
         r"\b20\d{2}[-/]\d{1,2}[-/]\d{1,2}\b",
-        rf"\b(?:{months})\s+\d{{1,2}}(?:,?\s+20\d{{2}})?\b",
-        rf"\b\d{{1,2}}\s+(?:{months})(?:\s+20\d{{2}})?\b",
+        rf"\b(?:{months})\s+\d{{1,2}},?\s+20\d{{2}}\b",
+        rf"\b\d{{1,2}}\s+(?:{months})\s+20\d{{2}}\b",
     ]
 
     matches = []
@@ -564,18 +734,10 @@ def extract_dates_from_text(value):
 
     matches.sort(key=lambda match: match.start())
 
-    year_match = re.search(r"\b(20\d{2})\b", value)
-    default_year = year_match.group(1) if year_match else None
-
     dates = []
 
     for match in matches:
-        date_text = match.group(0)
-
-        parsed = extract_date(date_text)
-
-        if parsed is None and default_year:
-            parsed = extract_date(f"{date_text}, {default_year}")
+        parsed = extract_date(match.group(0))
 
         if parsed is not None and parsed not in dates:
             dates.append(parsed)
@@ -583,7 +745,35 @@ def extract_dates_from_text(value):
     return sorted(dates)
 
 
-def extract_page_details(html, page_url, fallback_title="", fallback_description=""):
+def detect_country(*values):
+    text = " ".join(
+        safe_text(value) for value in values
+    ).casefold()
+
+    country_patterns = [
+        ("India", r"\b(india|indian|bharat)\b"),
+        ("United States", r"\b(united states|usa|u\.s\.a\.|u\.s\.)\b"),
+        ("United Kingdom", r"\b(united kingdom|uk|britain|england)\b"),
+        ("Canada", r"\bcanada\b"),
+        ("Australia", r"\baustralia\b"),
+        ("Singapore", r"\bsingapore\b"),
+        ("Germany", r"\bgermany\b"),
+        ("France", r"\bfrance\b"),
+    ]
+
+    for country, pattern in country_patterns:
+        if re.search(pattern, text):
+            return country
+
+    return ""
+
+
+def extract_page_details(
+    html,
+    page_url,
+    fallback_title="",
+    fallback_description="",
+):
     soup = BeautifulSoup(html, "html.parser")
     objects = get_jsonld_objects(soup)
 
@@ -592,6 +782,7 @@ def extract_page_details(html, page_url, fallback_title="", fallback_description
     company = ""
     organizer = ""
     location = ""
+    country = ""
     stipend = ""
     skills = ""
     internship_type = ""
@@ -608,6 +799,7 @@ def extract_page_details(html, page_url, fallback_title="", fallback_description
         'meta[name="twitter:title"]',
     ):
         tag = soup.select_one(selector)
+
         if tag and tag.get("content"):
             title = safe_text(tag["content"])
             break
@@ -618,8 +810,10 @@ def extract_page_details(html, page_url, fallback_title="", fallback_description
     for selector in (
         'meta[name="description"]',
         'meta[property="og:description"]',
+        'meta[name="twitter:description"]',
     ):
         tag = soup.select_one(selector)
+
         if tag and tag.get("content"):
             description = safe_text(tag["content"])
             break
@@ -628,61 +822,91 @@ def extract_page_details(html, page_url, fallback_title="", fallback_description
         types = schema_types(obj)
 
         if not title:
-            title = first_value(obj.get("title"), obj.get("name"))
+            title = first_value(obj.get("name"), obj.get("title"))
 
         if not description:
             description = first_value(obj.get("description"))
 
         if any("jobposting" in item for item in types):
             company = first_value(
-                obj.get("hiringOrganization"),
-                company,
+                obj.get("hiringOrganization"), company
             )
-            location = first_value(
-                obj.get("jobLocation"),
-                location,
-            )
+
+            job_location = obj.get("jobLocation")
+            location = first_value(job_location, location)
+
+            if isinstance(job_location, dict):
+                address = job_location.get("address", {})
+
+                if isinstance(address, dict):
+                    country = first_value(
+                        address.get("addressCountry"), country
+                    )
+
             skills = first_value(
                 obj.get("skills"),
                 obj.get("qualifications"),
                 skills,
             )
+
             internship_type = first_value(
-                obj.get("employmentType"),
-                internship_type,
+                obj.get("employmentType"), internship_type
             )
 
             base_salary = obj.get("baseSalary")
 
             if isinstance(base_salary, dict):
-                value = base_salary.get("value", {})
-                if isinstance(value, dict):
-                    minimum = value.get("minValue")
-                    maximum = value.get("maxValue")
-                    currency = value.get("currency", "")
-                    unit = value.get("unitText", "")
+                salary_value = base_salary.get("value", {})
+
+                if isinstance(salary_value, dict):
+                    minimum = salary_value.get("minValue")
+                    maximum = salary_value.get("maxValue")
+                    currency = salary_value.get("currency", "")
+                    unit = salary_value.get("unitText", "")
 
                     if minimum is not None and maximum is not None:
-                        stipend = f"{minimum}-{maximum} {currency} {unit}".strip()
+                        stipend = (
+                            f"{minimum}-{maximum} {currency} {unit}"
+                        ).strip()
                     elif minimum is not None:
                         stipend = f"{minimum} {currency} {unit}".strip()
                     elif maximum is not None:
                         stipend = f"{maximum} {currency} {unit}".strip()
 
-                elif value:
-                    stipend = f"{value} {base_salary.get('currency', '')}".strip()
-
-            deadline = extract_date(obj.get("validThrough")) or deadline
+            deadline = extract_date(
+                obj.get("validThrough")
+            ) or deadline
 
         if any(
             item in {"event", "hackathon", "festival"}
             for item in types
         ):
-            organizer = first_value(obj.get("organizer"), organizer)
-            location = first_value(obj.get("location"), location)
-            start_date = extract_date(obj.get("startDate")) or start_date
-            end_date = extract_date(obj.get("endDate")) or end_date
-            attendance_mode = str(obj.get("eventAttendanceMode") or "").lower()
+            organizer = first_value(
+                obj.get("organizer"), organizer
+            )
+
+            event_location = obj.get("location")
+            location = first_value(event_location, location)
+
+            if isinstance(event_location, dict):
+                address = event_location.get("address", {})
+
+                if isinstance(address, dict):
+                    country = first_value(
+                        address.get("addressCountry"), country
+                    )
+
+            start_date = (
+                extract_date(obj.get("startDate")) or start_date
+            )
+            end_date = (
+                extract_date(obj.get("endDate")) or end_date
+            )
+
+            attendance_mode = safe_text(
+                obj.get("eventAttendanceMode")
+            ).casefold()
+
             if "onlineeventattendance" in attendance_mode:
                 participation_mode = "online"
             elif "mixedeventattendance" in attendance_mode:
@@ -690,47 +914,48 @@ def extract_page_details(html, page_url, fallback_title="", fallback_description
             elif "offlineeventattendance" in attendance_mode:
                 participation_mode = "offline"
 
-        if not company:
-            company = first_value(obj.get("hiringOrganization"))
-
-        if not organizer:
-            organizer = first_value(obj.get("organizer"))
+        company = company or first_value(
+            obj.get("hiringOrganization")
+        )
+        organizer = organizer or first_value(
+            obj.get("organizer")
+        )
 
     text = safe_text(soup.get_text(" ", strip=True))
 
-    if not title:
-        title = safe_text(fallback_title)
-
-    if not description:
-        description = safe_text(fallback_description)
+    title = title or safe_text(fallback_title)
+    description = description or safe_text(fallback_description)
 
     if not company:
-        for pattern in (
-            r"(?:company|employer)\s*[:\-]\s*([^|.;]{2,120})",
-            r"(?:offered by|at)\s+([A-Z][A-Za-z0-9& .'-]{2,100})",
-        ):
-            match = re.search(pattern, text, re.IGNORECASE)
-            if match:
-                company = safe_text(match.group(1))
-                break
-
-    if not location:
         match = re.search(
-            r"(?:location|job location)\s*[:\-]\s*([^|.;]{2,100})",
+            r"(?:company|employer)\s*[:\-]\s*([^|.;]{2,120})",
             text,
             re.IGNORECASE,
         )
+
+        if match:
+            company = safe_text(match.group(1))
+
+    if not location:
+        match = re.search(
+            r"(?:job location|location)\s*[:\-]\s*([^|.;]{2,100})",
+            text,
+            re.IGNORECASE,
+        )
+
         if match:
             location = safe_text(match.group(1))
 
     if not stipend:
         match = re.search(
             r"(?:stipend|salary|compensation)\s*[:\-]\s*"
-            r"((?:INR|Rs\.?|₹|\$)?\s*[\d,]+(?:\s*[-–to]+\s*[\d,]+)?"
+            r"((?:INR|Rs\.?|₹|\$)?\s*[\d,]+"
+            r"(?:\s*[-–to]+\s*[\d,]+)?"
             r"\s*(?:per month|/month|monthly|per annum|/year|annually)?)",
             text,
             re.IGNORECASE,
         )
+
         if match:
             stipend = safe_text(match.group(1))
 
@@ -741,57 +966,70 @@ def extract_page_details(html, page_url, fallback_title="", fallback_description
             text,
             re.IGNORECASE,
         )
+
         if match:
             skills = safe_text(match.group(1))
 
     if not internship_type:
-        if re.search(r"\b(remote|work from home)\b", text, re.IGNORECASE):
+        if re.search(
+            r"\b(remote|work from home)\b", text, re.IGNORECASE
+        ):
             internship_type = "Remote"
         elif re.search(r"\bhybrid\b", text, re.IGNORECASE):
             internship_type = "Hybrid"
-        elif re.search(r"\bon[- ]site\b", text, re.IGNORECASE):
+        elif re.search(
+            r"\bon[- ]site\b", text, re.IGNORECASE
+        ):
             internship_type = "On-site"
 
     if not themes:
         match = re.search(
-            r"(?:themes?|tracks?)\s*[:\-]\s*(.{2,250}?)(?:\.|deadline|registration|$)",
+            r"(?:themes?|tracks?)\s*[:\-]\s*"
+            r"(.{2,250}?)(?:\.|deadline|registration|$)",
             text,
             re.IGNORECASE,
         )
+
         if match:
             themes = safe_text(match.group(1))
 
-    if not event_type:
-        if re.search(r"\b(hackathon|coding challenge)\b", title, re.IGNORECASE):
-            event_type = "Hackathon"
+    if not event_type and re.search(
+        r"\b(hackathon|coding challenge)\b",
+        title,
+        re.IGNORECASE,
+    ):
+        event_type = "Hackathon"
 
     if not participation_mode:
         if re.search(r"\bonline\b|\bvirtual\b", text, re.IGNORECASE):
             participation_mode = "online"
         elif re.search(r"\bhybrid\b", text, re.IGNORECASE):
             participation_mode = "hybrid"
-        elif re.search(r"\bin[- ]person\b|\bon[- ]site\b", text, re.IGNORECASE):
+        elif re.search(
+            r"\bin[- ]person\b|\bon[- ]site\b",
+            text,
+            re.IGNORECASE,
+        ):
             participation_mode = "offline"
-   
 
     date_pattern = (
-        r"([A-Za-z]{3,9}\s+\d{1,2},?\s+20\d{2}"
-        r"|\d{1,2}\s+[A-Za-z]{3,9}\s+20\d{2}"
-        r"|20\d{2}[-/]\d{1,2}[-/]\d{1,2})"
+        r"(20\d{2}[-/]\d{1,2}[-/]\d{1,2}"
+        r"|[A-Za-z]{3,9}\s+\d{1,2},?\s+20\d{2}"
+        r"|\d{1,2}\s+[A-Za-z]{3,9}\s+20\d{2})"
     )
 
     if not registration_deadline:
-        for pattern in (
+        match = re.search(
             r"(?:registration deadline|register by|last date to register|"
             r"last date to apply|application deadline|apply by|"
             r"registration closes|registration ends|applications close)"
             r"\s*[:\-]?\s*" + date_pattern,
-        ):
-            match = re.search(pattern, text, re.IGNORECASE)
-            if match:
-                registration_deadline = extract_date(match.group(0).strip())
-                if registration_deadline:
-                    break
+            text,
+            re.IGNORECASE,
+        )
+
+        if match:
+            registration_deadline = extract_date(match.group(1))
 
     if not start_date or not end_date:
         event_match = re.search(
@@ -803,9 +1041,13 @@ def extract_page_details(html, page_url, fallback_title="", fallback_description
         )
 
         if event_match:
-            event_dates = extract_dates_from_text(event_match.group(1))
+            event_dates = extract_dates_from_text(
+                event_match.group(1)
+            )
+
             if event_dates:
                 start_date = start_date or event_dates[0]
+
                 if len(event_dates) > 1:
                     end_date = end_date or event_dates[-1]
                 else:
@@ -814,11 +1056,16 @@ def extract_page_details(html, page_url, fallback_title="", fallback_description
     if not deadline:
         deadline = registration_deadline
 
+    country = country or detect_country(
+        location, text, title, description
+    )
+
     return {
         "title": title,
         "company": company,
         "organizer": organizer,
         "location": location,
+        "country": country,
         "description": description,
         "skills": skills,
         "stipend": stipend,
@@ -834,8 +1081,17 @@ def extract_page_details(html, page_url, fallback_title="", fallback_description
     }
 
 
-def discover_results(queries, num_results=5, profile=None, opportunity_type="internship"):
-    if not isinstance(num_results, int) or isinstance(num_results, bool) or num_results < 1:
+def discover_results(
+    queries,
+    num_results=5,
+    profile=None,
+    opportunity_type="internship",
+):
+    if (
+        not isinstance(num_results, int)
+        or isinstance(num_results, bool)
+        or num_results < 1
+    ):
         raise ValueError("num_results must be a positive integer")
 
     if isinstance(queries, str):
@@ -844,13 +1100,23 @@ def discover_results(queries, num_results=5, profile=None, opportunity_type="int
     if not isinstance(queries, (list, tuple)):
         raise ValueError("queries must be a list or tuple")
 
+    if opportunity_type not in {"internship", "hackathon"}:
+        raise ValueError(
+            "opportunity_type must be 'internship' or 'hackathon'"
+        )
+
     discovered_by_url = {}
+    search_failures = []
 
     for query in unique_strings(queries):
         try:
-            results = search_google(query, num_results=num_results)
+            results = search_google(
+                query, num_results=num_results
+            )
         except Exception as exc:
-            print(f"Search failed for '{query}': {exc}")
+            message = f"Search failed for '{query}': {exc}"
+            search_failures.append(message)
+            print(message)
             continue
 
         if not isinstance(results, (list, tuple)):
@@ -862,7 +1128,11 @@ def discover_results(queries, num_results=5, profile=None, opportunity_type="int
 
             url = normalize_url(result.get("link", ""))
 
-            if not url or not is_valid_http_url(url):
+            if (
+                not url
+                or not is_valid_http_url(url)
+                or not is_trusted_source(url, opportunity_type)
+            ):
                 continue
 
             title = safe_text(result.get("title"))
@@ -884,78 +1154,147 @@ def discover_results(queries, num_results=5, profile=None, opportunity_type="int
             if mentions_closed_registration(search_result):
                 continue
 
-            html, final_url = fetch_page(url)
+            html, final_page_url = fetch_page(url)
 
-            if html:
-                details = extract_page_details(
-                    html,
-                    final_url,
-                    fallback_title=title,
-                    fallback_description=snippet,
+            # Do not save records based only on search-engine snippets.
+            if not html:
+                continue
+
+            final_page_url = normalize_url(final_page_url)
+
+            # Validate the redirect destination before extracting data.
+            if (
+                not final_page_url
+                or not is_valid_http_url(final_page_url)
+                or not is_trusted_source(
+                    final_page_url, opportunity_type
                 )
-            else:
-                details = {
-                    "title": title,
-                    "company": "",
-                    "organizer": "",
-                    "location": "",
-                    "description": snippet,
-                    "skills": "",
-                    "stipend": "",
-                    "internship_type": "",
-                    "deadline": None,
-                    "themes": "",
-                    "event_type": "",
-                    "participation_mode": "",
-                    "registration_deadline": None,
-                    "start_date": None,
-                    "end_date": None,
-                    "source_url": url,
-                }
+            ):
+                continue
 
-            final_url = normalize_url(details.get("source_url")) or url
+            details = extract_page_details(
+                html,
+                final_page_url,
+                fallback_title=title,
+                fallback_description=snippet,
+            )
+
+            final_url = normalize_url(
+                details.get("source_url")
+            ) or final_page_url
+
+            if (
+                not is_valid_http_url(final_url)
+                or not is_trusted_source(final_url, opportunity_type)
+            ):
+                continue
+
             details["source_url"] = final_url
 
+            candidate_title = (
+                safe_text(details.get("title")) or title
+            )
+            candidate_description = (
+                safe_text(details.get("description")) or snippet
+            )
+
+            if is_likely_generic_page({
+                "title": candidate_title,
+                "snippet": candidate_description,
+                "link": final_url,
+            }):
+                continue
+
+            if mentions_closed_registration({
+                "title": candidate_title,
+                "snippet": candidate_description,
+            }):
+                continue
+
+            today = date.today()
+
+            if opportunity_type == "internship":
+                deadline = details.get("deadline")
+
+                if deadline and deadline < today:
+                    continue
+            else:
+                registration_deadline = details.get(
+                    "registration_deadline"
+                )
+                end_date = details.get("end_date")
+
+                if (
+                    registration_deadline
+                    and registration_deadline < today
+                ):
+                    continue
+
+                if end_date and end_date < today:
+                    continue
+
             scoring_result = {
-                "title": details["title"],
-                "snippet": details["description"],
+                "title": candidate_title,
+                "snippet": candidate_description,
             }
 
             score, matched_preferences = score_relevance(
-                scoring_result,
-                profile,
+                scoring_result, profile
             )
+
+            source_priority = get_source_priority(
+                final_url, opportunity_type
+            )
+
+            score += source_priority
 
             candidate = {
                 **details,
+                "title": candidate_title,
+                "description": candidate_description,
                 "source": safe_text(result.get("source")),
                 "query": query,
                 "relevance_score": score,
                 "matched_preferences": matched_preferences,
+                "source_priority": source_priority,
             }
-
-            if opportunity_type == "internship":
-                if not candidate.get("company"):
-                    candidate["company"] = ""
-            elif opportunity_type == "hackathon":
-                if not candidate.get("organizer"):
-                    candidate["organizer"] = ""
 
             existing = discovered_by_url.get(final_url)
 
             if existing is None:
                 discovered_by_url[final_url] = candidate
+
+            elif score > existing["relevance_score"]:
+                for key, value in existing.items():
+                    if value and not candidate.get(key):
+                        candidate[key] = value
+
+                discovered_by_url[final_url] = candidate
+
             else:
-                existing_score = existing["relevance_score"]
-                if score > existing_score:
-                    discovered_by_url[final_url] = candidate
-                else:
-                    for key, value in candidate.items():
-                        if value and not existing.get(key):
-                            existing[key] = value
+                for key, value in candidate.items():
+                    if value and not existing.get(key):
+                        existing[key] = value
 
     discovered = list(discovered_by_url.values())
-    discovered.sort(key=lambda item: item["relevance_score"], reverse=True)
+
+    discovered.sort(
+        key=lambda item: (
+            item.get("relevance_score", 0),
+            item.get("source_priority", 0),
+            bool(
+                item.get("deadline")
+                or item.get("registration_deadline")
+            ),
+        ),
+        reverse=True,
+    )
+
+    if search_failures and not discovered:
+        print(
+            f"All searches failed or returned no usable results. "
+            f"Failed searches: {len(search_failures)}"
+        )
 
     return discovered
 
