@@ -55,10 +55,13 @@ function Profile({ username, onLogout, onNavigate }: ProfileProps) {
 
                     <div className="profile-menu">
                         <button
-                            onClick={() => setOpen(false)}
-                        >
-                            <span>👤</span>
-                            <span>My Profile</span>
+                        onClick={() => {
+                            setOpen(false);
+                            onNavigate("profile");
+                            }}
+                            >
+                                <span>👤</span>
+                                <span>My Profile</span>
                         </button>
 
                         <button

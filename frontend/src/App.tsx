@@ -18,6 +18,7 @@ import Login from "./components/Pages/Login";
 import AdminDashboard from "./components/Pages/AdminDashboard";
 import SavedOpportunities from "./components/SavedOpportunities/SavedOpportunities";
 import type { Page } from "./types/navigation";
+import MyProfile from "./components/Pages/MyProfile";
 
 interface CurrentUserResponse {
     user?: {
@@ -133,6 +134,9 @@ function App() {
                 )}
                 {page === "saved" && isAuthenticated && (
                     <SavedOpportunities />
+                )}
+                {page === "profile" && isAuthenticated && (
+                    <MyProfile onNavigate={handleNavigate} />
                 )}
             </main>
 

@@ -225,6 +225,45 @@ export async function deleteHackathon(id: number): Promise<void> {
 }
 
 
+export interface UserProfile {
+    degree: string;
+    study_year: number | null;
+    skills: string[];
+    preferred_roles: string[];
+    preferred_locations: string[];
+    work_mode: "" | "remote" | "onsite" | "hybrid";
+}
+
+interface UserProfileResponse {
+    profile: UserProfile;
+}
+
+export async function getUserProfile(): Promise<UserProfile> {
+    const data = await apiRequest<UserProfileResponse>(
+        "/accounts/profile/"
+    );
+
+    return data.profile;
+}
+
+export async function updateUserProfile(
+    profile: Partial<UserProfile>
+): Promise<UserProfile> {
+    const data = await apiRequest<UserProfileResponse>(
+        "/accounts/profile/update/",
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(profile),
+        }
+    );
+
+    return data.profile;
+}
+
+
 export {
     API_BASE_URL,
     apiRequest,

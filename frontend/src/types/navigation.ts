@@ -1,5 +1,11 @@
-export type Page = "home" | "login" | "register" | "admin" | "saved";
-
+export type Page =
+    | "home"
+    | "login"
+    | "register"
+    | "admin"
+    | "saved"
+    | "profile";
+    
 export interface NavbarProps {
     isAuthenticated: boolean;
     isAdmin: boolean;
