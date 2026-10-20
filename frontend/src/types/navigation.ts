@@ -4,7 +4,8 @@ export type Page =
     | "register"
     | "admin"
     | "saved"
-    | "profile";
+    | "profile"
+    | "recommendations";
     
 export interface NavbarProps {
     isAuthenticated: boolean;

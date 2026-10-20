@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import {
     getUserProfile,
@@ -30,23 +31,33 @@ function MyProfile({ onNavigate }: MyProfileProps) {
     const [message, setMessage] = useState("");
 
     useEffect(() => {
+        let active = true;
+
         getUserProfile()
             .then((data) => {
+                if (!active) return;
+
                 setProfile(data);
                 setSkillsText(data.skills.join(", "));
                 setRolesText(data.preferred_roles.join(", "));
                 setLocationsText(data.preferred_locations.join(", "));
             })
             .catch((err: unknown) => {
-                setError(
-                    err instanceof Error
-                        ? err.message
-                        : "Failed to load profile."
-                );
+                if (active) {
+                    setError(
+                        err instanceof Error
+                            ? err.message
+                            : "Failed to load profile."
+                    );
+                }
             })
             .finally(() => {
-                setLoading(false);
+                if (active) setLoading(false);
             });
+
+        return () => {
+            active = false;
+        };
     }, []);
 
     function handleChange(
@@ -124,8 +135,7 @@ function MyProfile({ onNavigate }: MyProfileProps) {
             <div className="my-profile-header">
                 <h1>My Profile</h1>
                 <p>
-                    Tell us about yourself and your career
-                    preferences.
+                    Tell us about yourself and your career preferences.
                 </p>
             </div>
 
@@ -139,9 +149,7 @@ function MyProfile({ onNavigate }: MyProfileProps) {
                     onSubmit={handleSubmit}
                 >
                     <div className="profile-form-group">
-                        <label htmlFor="degree">
-                            Degree
-                        </label>
+                        <label htmlFor="degree">Degree</label>
                         <input
                             id="degree"
                             type="text"
@@ -169,9 +177,7 @@ function MyProfile({ onNavigate }: MyProfileProps) {
                                 )
                             }
                         >
-                            <option value="">
-                                Select study year
-                            </option>
+                            <option value="">Select study year</option>
                             {[1, 2, 3, 4, 5, 6].map((year) => (
                                 <option key={year} value={year}>
                                     Year {year}
@@ -181,9 +187,7 @@ function MyProfile({ onNavigate }: MyProfileProps) {
                     </div>
 
                     <div className="profile-form-group">
-                        <label htmlFor="skills">
-                            Skills
-                        </label>
+                        <label htmlFor="skills">Skills</label>
                         <textarea
                             id="skills"
                             placeholder="Python, React, Django"
@@ -194,9 +198,7 @@ function MyProfile({ onNavigate }: MyProfileProps) {
                                 setError("");
                             }}
                         />
-                        <small>
-                            Separate skills with commas.
-                        </small>
+                        <small>Separate skills with commas.</small>
                     </div>
 
                     <div className="profile-form-group">
@@ -213,9 +215,7 @@ function MyProfile({ onNavigate }: MyProfileProps) {
                                 setError("");
                             }}
                         />
-                        <small>
-                            Separate roles with commas.
-                        </small>
+                        <small>Separate roles with commas.</small>
                     </div>
 
                     <div className="profile-form-group">
@@ -232,9 +232,7 @@ function MyProfile({ onNavigate }: MyProfileProps) {
                                 setError("");
                             }}
                         />
-                        <small>
-                            Separate locations with commas.
-                        </small>
+                        <small>Separate locations with commas.</small>
                     </div>
 
                     <div className="profile-form-group">
@@ -245,15 +243,10 @@ function MyProfile({ onNavigate }: MyProfileProps) {
                             id="work-mode"
                             value={profile.work_mode}
                             onChange={(event) =>
-                                handleChange(
-                                    "work_mode",
-                                    event.target.value
-                                )
+                                handleChange("work_mode", event.target.value)
                             }
                         >
-                            <option value="">
-                                Select work mode
-                            </option>
+                            <option value="">Select work mode</option>
                             <option value="remote">Remote</option>
                             <option value="onsite">Onsite</option>
                             <option value="hybrid">Hybrid</option>
@@ -261,19 +254,13 @@ function MyProfile({ onNavigate }: MyProfileProps) {
                     </div>
 
                     {error && (
-                        <p
-                            className="profile-form-error"
-                            role="alert"
-                        >
+                        <p className="profile-form-error" role="alert">
                             {error}
                         </p>
                     )}
 
                     {message && (
-                        <p
-                            className="profile-form-success"
-                            role="status"
-                        >
+                        <p className="profile-form-success" role="status">
                             {message}
                         </p>
                     )}

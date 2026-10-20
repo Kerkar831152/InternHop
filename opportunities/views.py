@@ -2,6 +2,12 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
+from accounts.models import UserProfile
+from opportunities.services.recommendations import (
+    rank_internships,
+    rank_hackathons,
+)
 
 from opportunities.services.discovery import (
     discover_internships,
@@ -76,3 +82,20 @@ class DiscoverOpportunitiesView(APIView):
             },
             status=status.HTTP_200_OK,
         )
+
+
+class RecommendationsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        profile, _ = UserProfile.objects.get_or_create(
+            user=request.user
+        )
+
+        internships = rank_internships(profile)
+        hackathons = rank_hackathons(profile)
+
+        return Response({
+            "internships": internships,
+            "hackathons": hackathons,
+        })

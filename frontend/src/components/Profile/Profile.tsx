@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import type { Page } from "../../types/navigation";
 
@@ -6,6 +7,7 @@ export interface ProfileProps {
     onLogout: () => void;
     onNavigate: (page: Page) => void;
 }
+
 function Profile({ username, onLogout, onNavigate }: ProfileProps) {
     const [open, setOpen] = useState(false);
 
@@ -17,6 +19,11 @@ function Profile({ username, onLogout, onNavigate }: ProfileProps) {
         .slice(0, 2)
         .toUpperCase();
 
+    function handleNavigation(page: Page) {
+        setOpen(false);
+        onNavigate(page);
+    }
+
     function handleLogout() {
         setOpen(false);
         onLogout();
@@ -26,6 +33,7 @@ function Profile({ username, onLogout, onNavigate }: ProfileProps) {
         <div className="nav-action-wrapper">
             <button
                 className={`profile-btn ${open ? "profile-btn-active" : ""}`}
+                type="button"
                 onClick={() => setOpen((current) => !current)}
                 aria-label="Open profile menu"
                 aria-expanded={open}
@@ -55,36 +63,34 @@ function Profile({ username, onLogout, onNavigate }: ProfileProps) {
 
                     <div className="profile-menu">
                         <button
-                        onClick={() => {
-                            setOpen(false);
-                            onNavigate("profile");
-                            }}
-                            >
-                                <span>👤</span>
-                                <span>My Profile</span>
+                            type="button"
+                            onClick={() => handleNavigation("profile")}
+                        >
+                            <span>👤</span>
+                            <span>My Profile</span>
                         </button>
 
                         <button
-                            onClick={() => {
-                                setOpen(false);
-                                onNavigate("saved");
-                            }}
+                            type="button"
+                            onClick={() => handleNavigation("saved")}
                         >
                             <span>🔖</span>
                             <span>Saved Opportunities</span>
                         </button>
 
                         <button
-                            onClick={() => setOpen(false)}
+                            type="button"
+                            onClick={() => handleNavigation("recommendations")}
                         >
-                            <span>⚙</span>
-                            <span>Preferences</span>
+                            <span>⚙️</span>
+                            <span>Preferences &amp; Recommendations</span>
                         </button>
                     </div>
 
                     <div className="profile-dropdown-footer">
                         <button
                             className="sign-out-btn"
+                            type="button"
                             onClick={handleLogout}
                         >
                             <span>↪</span>

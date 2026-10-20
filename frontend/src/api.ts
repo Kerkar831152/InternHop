@@ -39,11 +39,36 @@ export interface HackathonRecord {
     status: string;
 }
 
+
+export interface RecommendedInternship extends InternshipRecord {
+    match_score: number;
+    match_reasons: string[];
+}
+
+export interface RecommendedHackathon extends HackathonRecord {
+    match_score: number;
+    match_reasons: string[];
+}
+
+export interface RecommendationsResponse {
+    internships: RecommendedInternship[];
+    hackathons: RecommendedHackathon[];
+}
+
+
 export interface SavedOpportunityRecord {
     id: number;
     type: "internship" | "hackathon";
     opportunity_id: number;
 }
+
+
+export async function getRecommendations(): Promise<RecommendationsResponse> {
+    return apiRequest<RecommendationsResponse>(
+        "/opportunities/recommendations/",
+    );
+}
+
 
 export async function getSavedOpportunities(): Promise<SavedOpportunityRecord[]> {
     const data = await apiRequest<{

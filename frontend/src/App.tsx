@@ -17,8 +17,10 @@ import Register from "./components/Pages/Register";
 import Login from "./components/Pages/Login";
 import AdminDashboard from "./components/Pages/AdminDashboard";
 import SavedOpportunities from "./components/SavedOpportunities/SavedOpportunities";
-import type { Page } from "./types/navigation";
 import MyProfile from "./components/Pages/MyProfile";
+import Recommendations from "./components/Pages/Recommendations";
+
+import type { Page } from "./types/navigation";
 
 interface CurrentUserResponse {
     user?: {
@@ -90,6 +92,15 @@ function App() {
             return;
         }
 
+        if (
+            (nextPage === "profile" || nextPage === "saved" ||
+                nextPage === "recommendations") &&
+            !isAuthenticated
+        ) {
+            setPage("login");
+            return;
+        }
+
         setPage(nextPage);
     }
 
@@ -107,8 +118,8 @@ function App() {
                 {page === "home" && (
                     <>
                         <Home />
-                       <Internships isAdmin={isAdmin} />
-                       <Hackathons isAdmin={isAdmin} />
+                        <Internships isAdmin={isAdmin} />
+                        <Hackathons isAdmin={isAdmin} />
                         <Verify />
                         <Intnem />
                         <About />
@@ -132,11 +143,17 @@ function App() {
                 {page === "admin" && isAdmin && (
                     <AdminDashboard />
                 )}
+
                 {page === "saved" && isAuthenticated && (
                     <SavedOpportunities />
                 )}
+
                 {page === "profile" && isAuthenticated && (
                     <MyProfile onNavigate={handleNavigate} />
+                )}
+
+                {page === "recommendations" && isAuthenticated && (
+                    <Recommendations />
                 )}
             </main>
 
