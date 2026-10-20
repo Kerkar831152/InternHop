@@ -10,6 +10,7 @@ function InternshipCard({
   internship,
   saved,
   onToggleSave,
+  canSave = true,
   isAdmin = false,
   onDelete,
 }: ExtendedInternshipCardProps) {
@@ -23,14 +24,16 @@ function InternshipCard({
         </div>
 
         <div className="card-top-actions">
-          <button
-            className={`save-button ${saved ? "saved" : ""}`}
-            onClick={() => onToggleSave(internship.id)}
-            aria-label={saved ? "Unsave internship" : "Save internship"}
-            aria-pressed={saved}
-          >
-            {saved ? "◆" : "◇"}
-          </button>
+          {canSave && (
+            <button
+              className={`save-button ${saved ? "saved" : ""}`}
+              onClick={() => onToggleSave(internship.id)}
+              aria-label={saved ? "Unsave internship" : "Save internship"}
+              aria-pressed={saved}
+            >
+              {saved ? "◆" : "◇"}
+            </button>
+          )}
 
           {isAdmin && onDelete && (
             <button
@@ -58,6 +61,11 @@ function InternshipCard({
         ))}
       </div>
 
+      <details className="opportunity-details">
+        <summary>View details</summary>
+        <p>{internship.description || "No description provided."}</p>
+      </details>
+
       <div className="card-divider"></div>
 
       <div className="card-bottom">
@@ -79,7 +87,7 @@ function InternshipCard({
           target="_blank"
           rel="noopener noreferrer"
         >
-          View opportunity <span>→</span>
+          Apply / view opportunity <span>→</span>
         </a>
       ) : (
         <button className="card-action" disabled>

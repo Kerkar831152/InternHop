@@ -15,7 +15,7 @@ function Intnem() {
       id: 1,
       sender: "intnem",
       text:
-        "Hey! I'm Intnem. Send me an internship, hackathon, or question and I'll help you understand it.",
+        "The assistant service is not connected yet. Messages and images stay in this preview and are not analyzed.",
     },
   ]);
 
@@ -71,17 +71,15 @@ function Intnem() {
 
     setMessage("");
 
-    setTimeout(() => {
-      setMessages((current) => [
-        ...current,
-        {
-          id: Date.now() + 1,
-          sender: "intnem",
-          text:
-            "I'm ready to analyze that. Once the backend is connected, I'll check the opportunity against available evidence and explain the result.",
-        },
-      ]);
-    }, 500);
+    setMessages((current) => [
+      ...current,
+      {
+        id: Date.now() + 1,
+        sender: "intnem",
+        text:
+          "No analysis was performed. Connect an assistant service to receive a response.",
+      },
+    ]);
 
     setImage(null);
 
@@ -145,7 +143,7 @@ function Intnem() {
                 <strong>Intnem</strong>
                 <span>
                   <i></i>
-                  Online
+                  Preview
                 </span>
               </div>
             </div>
@@ -191,7 +189,7 @@ function Intnem() {
 
               <div className="chat-status">
                 <span></span>
-                Ready
+                Not connected
               </div>
             </div>
 

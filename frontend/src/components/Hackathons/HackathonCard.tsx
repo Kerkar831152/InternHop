@@ -10,6 +10,7 @@ function HackathonCard({
   hackathon,
   saved,
   onToggleSave,
+  canSave = true,
   isAdmin = false,
   onDelete,
 }: ExtendedHackathonCardProps) {
@@ -23,14 +24,16 @@ function HackathonCard({
         </div>
 
         <div className="card-top-actions">
-          <button
-            className={`save-button ${saved ? "saved" : ""}`}
-            onClick={() => onToggleSave(hackathon.id)}
-            aria-label={saved ? "Unsave hackathon" : "Save hackathon"}
-            aria-pressed={saved}
-          >
-            {saved ? "◆" : "◇"}
-          </button>
+          {canSave && (
+            <button
+              className={`save-button ${saved ? "saved" : ""}`}
+              onClick={() => onToggleSave(hackathon.id)}
+              aria-label={saved ? "Unsave hackathon" : "Save hackathon"}
+              aria-pressed={saved}
+            >
+              {saved ? "◆" : "◇"}
+            </button>
+          )}
 
           {isAdmin && onDelete && (
             <button
@@ -60,6 +63,11 @@ function HackathonCard({
           <span key={skill}>{skill}</span>
         ))}
       </div>
+
+      <details className="opportunity-details">
+        <summary>View details</summary>
+        <p>{hackathon.description || "No description provided."}</p>
+      </details>
 
       <div className="card-divider"></div>
 

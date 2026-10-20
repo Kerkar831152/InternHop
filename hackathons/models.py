@@ -1,4 +1,3 @@
-
 from django.db import models
 
 
@@ -18,6 +17,12 @@ class Hackathon(models.Model):
     title = models.CharField(max_length=200)
     organizer = models.CharField(max_length=200)
     location = models.CharField(max_length=200)
+    country = models.CharField(
+        max_length=100,
+        blank=True,
+        default="",
+        db_index=True,
+    )
     description = models.TextField(max_length=1000)
     themes = models.TextField(max_length=500, blank=True)
     event_type = models.CharField(max_length=50)
@@ -27,6 +32,7 @@ class Hackathon(models.Model):
         choices=WorkMode.choices,
         default=WorkMode.UNKNOWN,
     )
+
     registration_deadline = models.DateField(
         null=True,
         blank=True,

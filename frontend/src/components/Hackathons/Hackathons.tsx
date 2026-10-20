@@ -8,20 +8,25 @@ import {
 } from "../../api";
 import HackathonCard from "./HackathonCard";
 import HackathonFilters from "./HackathonFilters";
+import type { Page } from "../../types/navigation";
 
 
 interface HackathonsProps {
   isAdmin: boolean;
+  isAuthenticated: boolean;
+  onNavigate: (page: Page) => void;
 }
 
-function Hackathons({ isAdmin }: HackathonsProps) {
+function Hackathons({ isAdmin, isAuthenticated, onNavigate }: HackathonsProps) {
   const [search, setSearch] = useState("");
   const [location, setLocation] = useState("");
   const [type, setType] = useState("");
+  const [sortBy, setSortBy] = useState<"recommended" | "deadline" | "title">("recommended");
   const [saved, setSaved] = useState<number[]>([]);
   const [hackathons, setHackathons] = useState<HackathonRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [savedError, setSavedError] = useState("");
 
   useEffect(() => {
     let active = true;
@@ -52,6 +57,8 @@ function Hackathons({ isAdmin }: HackathonsProps) {
   }, []);
 
   useEffect(() => {
+  if (!isAuthenticated) return;
+
   let active = true;
 
   getSavedOpportunities()
@@ -62,21 +69,23 @@ function Hackathons({ isAdmin }: HackathonsProps) {
             .filter((item) => item.type === "hackathon")
             .map((item) => item.opportunity_id)
         );
+        setSavedError("");
       }
     })
     .catch(() => {
       if (active) {
         setSaved([]);
+        setSavedError("Saved status could not be loaded.");
       }
     });
 
   return () => {
     active = false;
   };
-}, []);
+}, [isAuthenticated]);
 
   const filteredHackathons = useMemo(() => {
-    return hackathons.filter((hackathon) => {
+    const filtered = hackathons.filter((hackathon) => {
       const query = search.toLowerCase();
       const skills = hackathon.themes
         .split(",")
@@ -86,6 +95,7 @@ function Hackathons({ isAdmin }: HackathonsProps) {
       const matchesSearch =
         hackathon.title.toLowerCase().includes(query) ||
         hackathon.organizer.toLowerCase().includes(query) ||
+        hackathon.description.toLowerCase().includes(query) ||
         skills.some((skill) => skill.toLowerCase().includes(query));
 
       const matchesLocation =
@@ -98,12 +108,48 @@ function Hackathons({ isAdmin }: HackathonsProps) {
 
       return matchesSearch && matchesLocation && matchesType;
     });
-  }, [hackathons, search, location, type]);
+    if (sortBy === "title") {
+      return filtered.sort((a, b) => a.title.localeCompare(b.title));
+    }
+
+    if (sortBy === "deadline") {
+      return filtered.sort((a, b) => {
+        const aDate = a.registration_deadline
+          ? Date.parse(a.registration_deadline)
+          : Number.POSITIVE_INFINITY;
+        const bDate = b.registration_deadline
+          ? Date.parse(b.registration_deadline)
+          : Number.POSITIVE_INFINITY;
+        return (Number.isNaN(aDate) ? Number.POSITIVE_INFINITY : aDate) -
+          (Number.isNaN(bDate) ? Number.POSITIVE_INFINITY : bDate);
+      });
+    }
+
+    return filtered;
+  }, [hackathons, search, location, type, sortBy]);
+
+  const locations = useMemo(
+    () => Array.from(new Set(hackathons.map((item) => item.location).filter(Boolean))).sort(),
+    [hackathons]
+  );
+
+  const types = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          hackathons
+            .flatMap((item) => [item.event_type, item.participation_mode])
+            .filter(Boolean)
+        )
+      ).sort(),
+    [hackathons]
+  );
 
  const toggleSave = async (id: number) => {
   try {
     const result = await toggleSavedOpportunity("hackathon", id);
 
+    setSavedError("");
     setSaved((current) =>
       result.saved
         ? current.includes(id)
@@ -160,9 +206,13 @@ function Hackathons({ isAdmin }: HackathonsProps) {
             </p>
           </div>
 
-          <a href="#intnem" className="section-link">
+          <button
+            type="button"
+            className="section-link"
+            onClick={() => onNavigate("assistant")}
+          >
             Ask Intnem →
-          </a>
+          </button>
         </div>
 
         <HackathonFilters
@@ -172,7 +222,17 @@ function Hackathons({ isAdmin }: HackathonsProps) {
           onSearchChange={setSearch}
           onLocationChange={setLocation}
           onTypeChange={setType}
+          locations={locations}
+          types={types}
+          sortBy={sortBy}
+          onSortChange={setSortBy}
         />
+
+        {savedError && (
+          <p className="opportunity-save-state" role="status">
+            {savedError}
+          </p>
+        )}
 
         {loading && (
           <div className="no-results">
@@ -209,9 +269,11 @@ function Hackathons({ isAdmin }: HackathonsProps) {
                     prize: "Not specified",
                     deadline:
                       hackathon.registration_deadline || "Not specified",
+                    description: hackathon.description,
                   }}
                   saved={saved.includes(hackathon.id)}
                   onToggleSave={toggleSave}
+                  canSave={isAuthenticated}
                   isAdmin={isAdmin}
                   onDelete={handleDelete}
                 />

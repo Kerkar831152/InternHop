@@ -5,12 +5,19 @@ export type Page =
     | "admin"
     | "saved"
     | "profile"
-    | "recommendations";
-    
+    | "recommendations"
+    | "explore"
+    | "internships"
+    | "hackathons"
+    | "verify"
+    | "assistant"
+    | "about";
+
 export interface NavbarProps {
     isAuthenticated: boolean;
     isAdmin: boolean;
     username: string | null;
+    activePage: Page;
     onNavigate: (page: Page) => void;
     onLogout: () => void;
 }

@@ -66,7 +66,7 @@ function Profile({ username, onLogout, onNavigate }: ProfileProps) {
                             type="button"
                             onClick={() => handleNavigation("profile")}
                         >
-                            <span>👤</span>
+                            <span aria-hidden="true">P</span>
                             <span>My Profile</span>
                         </button>
 
@@ -74,7 +74,7 @@ function Profile({ username, onLogout, onNavigate }: ProfileProps) {
                             type="button"
                             onClick={() => handleNavigation("saved")}
                         >
-                            <span>🔖</span>
+                            <span aria-hidden="true">S</span>
                             <span>Saved Opportunities</span>
                         </button>
 
@@ -82,7 +82,7 @@ function Profile({ username, onLogout, onNavigate }: ProfileProps) {
                             type="button"
                             onClick={() => handleNavigation("recommendations")}
                         >
-                            <span>⚙️</span>
+                            <span aria-hidden="true">R</span>
                             <span>Preferences &amp; Recommendations</span>
                         </button>
                     </div>
@@ -93,7 +93,7 @@ function Profile({ username, onLogout, onNavigate }: ProfileProps) {
                             type="button"
                             onClick={handleLogout}
                         >
-                            <span>↪</span>
+                            <span aria-hidden="true">↗</span>
                             <span>Sign out</span>
                         </button>
                     </div>

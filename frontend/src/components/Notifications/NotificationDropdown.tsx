@@ -37,6 +37,8 @@ function NotificationDropdown({
         className={`nav-icon-button ${open ? "active" : ""}`}
         onClick={() => setOpen(!open)}
         aria-label="Notifications"
+        aria-expanded={open}
+        type="button"
       >
         <span className="bell-icon">♢</span>
 

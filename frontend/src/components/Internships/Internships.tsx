@@ -8,20 +8,25 @@ import {
 } from "../../api";
 import InternshipCard from "./InternshipCard";
 import InternshipFilters from "./InternshipFilters";
+import type { Page } from "../../types/navigation";
 
 
 interface InternshipsProps {
   isAdmin: boolean;
+  isAuthenticated: boolean;
+  onNavigate: (page: Page) => void;
 }
 
-function Internships({ isAdmin }: InternshipsProps) {
+function Internships({ isAdmin, isAuthenticated, onNavigate }: InternshipsProps) {
   const [search, setSearch] = useState("");
   const [location, setLocation] = useState("");
   const [type, setType] = useState("");
+  const [sortBy, setSortBy] = useState<"recommended" | "deadline" | "title">("recommended");
   const [saved, setSaved] = useState<number[]>([]);
   const [internships, setInternships] = useState<InternshipRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [savedError, setSavedError] = useState("");
 
   useEffect(() => {
     let active = true;
@@ -52,6 +57,8 @@ function Internships({ isAdmin }: InternshipsProps) {
   }, []);
 
   useEffect(() => {
+  if (!isAuthenticated) return;
+
   let active = true;
 
   getSavedOpportunities()
@@ -62,21 +69,23 @@ function Internships({ isAdmin }: InternshipsProps) {
             .filter((item) => item.type === "internship")
             .map((item) => item.opportunity_id)
         );
+        setSavedError("");
       }
     })
     .catch(() => {
       if (active) {
         setSaved([]);
+        setSavedError("Saved status could not be loaded.");
       }
     });
 
   return () => {
     active = false;
   };
-}, []);
+}, [isAuthenticated]);
 
   const filteredInternships = useMemo(() => {
-    return internships.filter((internship) => {
+    const filtered = internships.filter((internship) => {
       const query = search.toLowerCase();
       const skills = internship.skills
         .split(",")
@@ -88,6 +97,7 @@ function Internships({ isAdmin }: InternshipsProps) {
       const matchesSearch =
         internship.title.toLowerCase().includes(query) ||
         internship.company.toLowerCase().includes(query) ||
+        internship.description.toLowerCase().includes(query) ||
         skills.some((skill) => skill.toLowerCase().includes(query));
 
       const matchesLocation =
@@ -101,12 +111,38 @@ function Internships({ isAdmin }: InternshipsProps) {
 
       return matchesSearch && matchesLocation && matchesType;
     });
-  }, [internships, search, location, type]);
+
+    if (sortBy === "title") {
+      return filtered.sort((a, b) => a.title.localeCompare(b.title));
+    }
+
+    if (sortBy === "deadline") {
+      return filtered.sort((a, b) => {
+        const aDate = a.deadline ? Date.parse(a.deadline) : Number.POSITIVE_INFINITY;
+        const bDate = b.deadline ? Date.parse(b.deadline) : Number.POSITIVE_INFINITY;
+        return (Number.isNaN(aDate) ? Number.POSITIVE_INFINITY : aDate) -
+          (Number.isNaN(bDate) ? Number.POSITIVE_INFINITY : bDate);
+      });
+    }
+
+    return filtered;
+  }, [internships, search, location, type, sortBy]);
+
+  const locations = useMemo(
+    () => Array.from(new Set(internships.map((item) => item.location).filter(Boolean))).sort(),
+    [internships]
+  );
+
+  const types = useMemo(
+    () => Array.from(new Set(internships.map((item) => item.internship_type).filter(Boolean))).sort(),
+    [internships]
+  );
 
  const toggleSave = async (id: number) => {
   try {
     const result = await toggleSavedOpportunity("internship", id);
 
+    setSavedError("");
     setSaved((current) =>
       result.saved
         ? current.includes(id)
@@ -157,9 +193,13 @@ function Internships({ isAdmin }: InternshipsProps) {
             </p>
           </div>
 
-          <a href="#verify" className="section-link">
-            Verify an opportunity →
-          </a>
+          <button
+            type="button"
+            className="section-link"
+            onClick={() => onNavigate("verify")}
+          >
+            Check an opportunity image →
+          </button>
         </div>
 
         <InternshipFilters
@@ -169,7 +209,17 @@ function Internships({ isAdmin }: InternshipsProps) {
           onSearchChange={setSearch}
           onLocationChange={setLocation}
           onTypeChange={setType}
+          locations={locations}
+          types={types}
+          sortBy={sortBy}
+          onSortChange={setSortBy}
         />
+
+        {savedError && (
+          <p className="opportunity-save-state" role="status">
+            {savedError}
+          </p>
+        )}
 
         {loading && (
           <div className="no-results">
@@ -203,10 +253,12 @@ function Internships({ isAdmin }: InternshipsProps) {
                       .filter(Boolean),
                     stipend: internship.stipend || "Not specified",
                     deadline: internship.deadline || "Not specified",
+                    description: internship.description,
                     source_url: internship.source_url,
                   }}
                   saved={saved.includes(internship.id)}
                   onToggleSave={toggleSave}
+                  canSave={isAuthenticated}
                   isAdmin={isAdmin}
                   onDelete={handleDelete}
                 />

@@ -1,118 +1,181 @@
-import { useState } from "react";
-
-import VerificationForm from "./VerificationForm";
-import VerificationResult from "./VerificationResult";
-
-import type { VerificationResult as VerificationResultType } from "../../types/verification";
+import { useEffect, useRef, useState } from "react";
+import type { ChangeEvent, DragEvent } from "react";
 
 function Verify() {
-  const [url, setUrl] = useState("");
-  const [image, setImage] = useState<File | null>(null);
-  const [result, setResult] =
-    useState<VerificationResultType | null>(null);
+    const fileInputRef = useRef<HTMLInputElement | null>(null);
+    const [image, setImage] = useState<File | null>(null);
+    const [previewUrl, setPreviewUrl] = useState("");
+    const [dragging, setDragging] = useState(false);
+    const [error, setError] = useState("");
+    const [showUnavailableResult, setShowUnavailableResult] = useState(false);
 
-  const handleVerify = () => {
-    setResult({
-      confidence: 87,
-      status: "review",
-      summary:
-        "The opportunity has several positive signals, but some details should be checked before applying.",
-      checks: [
-        {
-          label: "Opportunity source",
-          status: "passed",
-          message:
-            "The source appears to contain identifiable organization information.",
-        },
-        {
-          label: "Application process",
-          status: "passed",
-          message:
-            "No obvious unusual payment requirement was detected.",
-        },
-        {
-          label: "Contact information",
-          status: "warning",
-          message:
-            "Some contact details could not be independently confirmed.",
-        },
-        {
-          label: "Overall consistency",
-          status: "passed",
-          message:
-            "The opportunity details are mostly consistent with the provided listing.",
-        },
-      ],
-    });
-  };
+    useEffect(() => {
+        return () => {
+            if (previewUrl) URL.revokeObjectURL(previewUrl);
+        };
+    }, [previewUrl]);
 
-  return (
-    <section className="section verify-section" id="verify">
-      <div className="section-container">
-        <div className="verify-layout">
-          <div className="verify-copy">
-            <span className="section-label">OPPORTUNITY VERIFY</span>
+    function selectImage(file: File | undefined) {
+        setError("");
+        setShowUnavailableResult(false);
 
-            <h2>
-              Not sure if it's
-              <span> worth trusting?</span>
-            </h2>
+        if (!file) return;
+        if (!file.type.startsWith("image/")) {
+            setImage(null);
+            setPreviewUrl("");
+            setError("Choose an image file to preview.");
+            return;
+        }
 
-            <p>
-              Found an internship or hackathon somewhere else?
-              Send it to InternHop. Intnem can analyze the available
-              information and highlight signals that deserve
-              attention.
-            </p>
+        setImage(file);
+        setPreviewUrl(URL.createObjectURL(file));
+    }
 
-            <div className="verify-flow">
-              <div className="flow-item">
-                <span>01</span>
-                <div>
-                  <strong>Submit</strong>
-                  <p>URL or screenshot</p>
-                </div>
-              </div>
+    function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
+        selectImage(event.target.files?.[0]);
+        event.target.value = "";
+    }
 
-              <div className="flow-line"></div>
+    function handleDrop(event: DragEvent<HTMLDivElement>) {
+        event.preventDefault();
+        setDragging(false);
+        selectImage(event.dataTransfer.files[0]);
+    }
 
-              <div className="flow-item">
-                <span>02</span>
-                <div>
-                  <strong>Analyze</strong>
-                  <p>Evidence and signals</p>
-                </div>
-              </div>
+    function handleCheckImage() {
+        if (image) setShowUnavailableResult(true);
+    }
 
-              <div className="flow-line"></div>
+    function handleRemoveImage() {
+        setImage(null);
+        setPreviewUrl("");
+        setError("");
+        setShowUnavailableResult(false);
+    }
 
-              <div className="flow-item">
-                <span>03</span>
-                <div>
-                  <strong>Understand</strong>
-                  <p>Confidence and warnings</p>
-                </div>
-              </div>
-            </div>
-          </div>
+    return (
+        <section className="image-check-page">
+            <header className="image-check-header">
+                <span className="image-check-eyebrow">OPPORTUNITY SAFETY</span>
+                <h1>Check an opportunity image</h1>
+                <p>
+                    Review an internship, hackathon, or opportunity image before
+                    taking action. The checker will only report what it can
+                    support with evidence.
+                </p>
+            </header>
 
-          <div className="verify-panel">
-            {!result ? (
-              <VerificationForm
-                url={url}
-                onUrlChange={setUrl}
-                image={image}
-                onImageChange={setImage}
-                onVerify={handleVerify}
-              />
-            ) : (
-              <VerificationResult result={result} />
-            )}
-          </div>
-        </div>
-      </div>
-    </section>
-  );
+            <section className="image-check-panel" aria-label="Image legitimacy checker">
+                <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    aria-label="Choose an image to check"
+                    hidden
+                />
+                {!showUnavailableResult ? (
+                    <>
+                        <div
+                            className={`image-drop-zone${dragging ? " is-dragging" : ""}${image ? " has-image" : ""}`}
+                            onDragEnter={(event) => {
+                                event.preventDefault();
+                                setDragging(true);
+                            }}
+                            onDragOver={(event) => event.preventDefault()}
+                            onDragLeave={(event) => {
+                                if (
+                                    !(event.relatedTarget instanceof Node) ||
+                                    !event.currentTarget.contains(event.relatedTarget)
+                                ) {
+                                    setDragging(false);
+                                }
+                            }}
+                            onDrop={handleDrop}
+                        >
+                            {previewUrl ? (
+                                <img
+                                    className="image-check-preview"
+                                    src={previewUrl}
+                                    alt={`Preview of ${image?.name ?? "selected image"}`}
+                                />
+                            ) : (
+                                <span className="image-upload-icon" aria-hidden="true">
+                                    ↑
+                                </span>
+                            )}
+                            <h2>{image ? image.name : "Drop an image here"}</h2>
+                            <p>
+                                {image
+                                    ? `${(image.size / 1024 / 1024).toFixed(2)} MB · Preview stays on this device`
+                                    : "Choose an image from your device or drag it into this area."}
+                            </p>
+                            <button
+                                className="image-browse-button"
+                                type="button"
+                                onClick={() => fileInputRef.current?.click()}
+                            >
+                                Browse images
+                            </button>
+                        </div>
+
+                        <p className="image-check-guidance">
+                            Browser-supported image files can be previewed. The
+                            project does not currently provide a verification
+                            endpoint or publish upload size limits. Your image is
+                            not uploaded.
+                        </p>
+
+                        {error && <p className="image-check-error" role="alert">{error}</p>}
+
+                        <div className="image-check-actions">
+                            {image && (
+                                <button
+                                    className="image-remove-button"
+                                    type="button"
+                                    onClick={handleRemoveImage}
+                                >
+                                    Remove image
+                                </button>
+                            )}
+                            <button
+                                className="image-check-submit"
+                                type="button"
+                                disabled={!image}
+                                onClick={handleCheckImage}
+                            >
+                                Check image
+                            </button>
+                        </div>
+                    </>
+                ) : (
+                    <div className="image-check-result" role="status">
+                        <span className="image-result-status">Unable to verify</span>
+                        <h2>No analysis was performed</h2>
+                        <p>
+                            InternHop does not currently have a connected image
+                            verification service. This image has not been
+                            evaluated, and we cannot determine whether its claims
+                            are genuine.
+                        </p>
+                        <button
+                            className="image-browse-button"
+                            type="button"
+                            onClick={() => {
+                                setImage(null);
+                                setPreviewUrl("");
+                                setError("");
+                                setShowUnavailableResult(false);
+                                fileInputRef.current?.click();
+                            }}
+                        >
+                            Choose another image
+                        </button>
+                    </div>
+                )}
+            </section>
+        </section>
+    );
 }
 
 export default Verify;

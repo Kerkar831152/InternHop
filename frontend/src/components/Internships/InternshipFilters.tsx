@@ -1,5 +1,10 @@
 import type { InternshipFiltersProps } from "../../types/internships";
 
+function getSortOrder(value: string): InternshipFiltersProps["sortBy"] {
+  if (value === "deadline" || value === "title") return value;
+  return "recommended";
+}
+
 function InternshipFilters({
   search,
   location,
@@ -7,6 +12,10 @@ function InternshipFilters({
   onSearchChange,
   onLocationChange,
   onTypeChange,
+  locations,
+  types,
+  sortBy,
+  onSortChange,
 }: InternshipFiltersProps) {
   return (
     <div className="filter-bar">
@@ -14,6 +23,8 @@ function InternshipFilters({
         <span>⌕</span>
 
         <input
+          type="search"
+          aria-label="Search internships"
           value={search}
           onChange={(event) => onSearchChange(event.target.value)}
           placeholder="Search internships..."
@@ -21,24 +32,30 @@ function InternshipFilters({
       </div>
 
       <select
+        aria-label="Filter internships by location"
         value={location}
-        onChange={(event) => onLocationChange(event.target.value)}
-      >
+        onChange={(event) => onLocationChange(event.target.value)}>
         <option value="">All locations</option>
-        <option value="Goa">Goa</option>
-        <option value="Bangalore">Bangalore</option>
-        <option value="Mumbai">Mumbai</option>
-        <option value="Remote">Remote</option>
+        {locations.map((item) => <option key={item} value={item}>{item}</option>)}
       </select>
 
       <select
+        aria-label="Filter internships by work mode"
         value={type}
         onChange={(event) => onTypeChange(event.target.value)}
       >
         <option value="">All types</option>
-        <option value="Remote">Remote</option>
-        <option value="Hybrid">Hybrid</option>
-        <option value="On-site">On-site</option>
+        {types.map((item) => <option key={item} value={item}>{item}</option>)}
+      </select>
+
+      <select
+        aria-label="Sort internships"
+        value={sortBy}
+        onChange={(event) => onSortChange(getSortOrder(event.target.value))}
+      >
+        <option value="recommended">Recommended order</option>
+        <option value="deadline">Deadline soonest</option>
+        <option value="title">Title A–Z</option>
       </select>
     </div>
   );

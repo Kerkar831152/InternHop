@@ -12,8 +12,8 @@ function About() {
 
           <p>
             InternHop brings internships and hackathons into one
-            focused platform, helping students discover opportunities
-            that actually match what they're looking for.
+            focused platform, helping students find opportunities
+            that may suit their goals.
           </p>
         </div>
 
@@ -37,8 +37,9 @@ function About() {
             <h3>Verify</h3>
 
             <p>
-              Check opportunities found elsewhere and understand the
-              available evidence before applying or registering.
+              Preview the image-check experience. Until an analysis
+              service is connected, InternHop will say when it cannot
+              establish authenticity.
             </p>
           </div>
 

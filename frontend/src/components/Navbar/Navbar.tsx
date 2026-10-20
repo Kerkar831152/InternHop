@@ -1,94 +1,98 @@
+import { useState } from "react";
 import NotificationDropdown from "../Notifications/NotificationDropdown";
 import Profile from "../Profile/Profile";
 
 import type { Notification } from "../../types/notification";
 import type { NavbarProps } from "../../types/navigation";
 
-import { useState } from "react";
-
 function Navbar({
     isAuthenticated,
     isAdmin,
     username,
+    activePage,
     onNavigate,
     onLogout,
 }: NavbarProps) {
-    const [notifications, setNotifications] = useState<Notification[]>([
-        {
-            id: 1,
-            title: "New internship match",
-            message: "A React internship matches your skills.",
-            type: "recommended",
-            read: false,
-        },
-        {
-            id: 2,
-            title: "Hackathon deadline",
-            message: "A hackathon you saved ends soon.",
-            type: "deadline",
-            read: false,
-        },
-    ]);
+    const [notifications, setNotifications] = useState<Notification[]>([]);
 
     return (
         <nav className="navbar">
-            <a
-                href="#home"
+            <button
+                type="button"
                 className="logo"
                 onClick={() => onNavigate("home")}
+                aria-label="InternHop home"
             >
-                Intern<span>Hop</span>
-            </a>
+                <span className="logo-mark" aria-hidden="true">I</span>
+                <span>Intern<span>Hop</span></span>
+            </button>
 
             <div className="nav-links">
-                <a href="#internships" onClick={() => onNavigate("home")}>
-                    Internships
-                </a>
+                {([
+                    ["home", "Home"],
+                    ["explore", "Explore"],
+                    ["internships", "Internships"],
+                    ["hackathons", "Hackathons"],
+                    ["verify", "Image check"],
+                    ["assistant", "Ask Intnem"],
+                    ["about", "About"],
+                ] as const).map(([page, label]) => (
+                    <button
+                        className="nav-link"
+                        type="button"
+                        key={page}
+                        aria-current={activePage === page ? "page" : undefined}
+                        onClick={() => onNavigate(page)}
+                    >
+                        {label}
+                    </button>
+                ))}
 
-                <a href="#hackathons" onClick={() => onNavigate("home")}>
-                    Hackathons
-                </a>
-
-                <a href="#verify" onClick={() => onNavigate("home")}>
-                    Verify
-                </a>
-
-                <a href="#about" onClick={() => onNavigate("home")}>
-                    About
-                </a>
+                {isAuthenticated && (
+                    <>
+                        <button
+                            className="nav-link"
+                            type="button"
+                            aria-current={activePage === "saved" ? "page" : undefined}
+                            onClick={() => onNavigate("saved")}
+                        >
+                            Saved
+                        </button>
+                        <button
+                            className="nav-link"
+                            type="button"
+                            aria-current={activePage === "profile" ? "page" : undefined}
+                            onClick={() => onNavigate("profile")}
+                        >
+                            Profile
+                        </button>
+                    </>
+                )}
 
                 {isAuthenticated && isAdmin && (
                     <button
-                        className="auth-nav-login"
+                        className="nav-link"
+                        type="button"
+                        aria-current={activePage === "admin" ? "page" : undefined}
                         onClick={() => onNavigate("admin")}
                     >
-                        Admin Dashboard
+                        Admin
                     </button>
                 )}
             </div>
 
             <div className="navbar-actions">
-                <a
-                    href="#intnem"
-                    className="intnem-nav-btn"
-                    onClick={() => onNavigate("home")}
-                >
-                    <span className="intnem-logo">✦</span>
-                    <span>Ask Intnem</span>
-                </a>
-
                 {isAuthenticated && username ? (
                     <>
                         <NotificationDropdown
                             notifications={notifications}
                             setNotifications={setNotifications}
                         />
-
                         <Profile
-                         username={username}
-                         onLogout={onLogout}
-                         onNavigate={onNavigate}
-                         />
+                            username={username}
+                            onLogout={onLogout}
+                            onNavigate={onNavigate}
+                        />
                     </>
                 ) : (
                     <div className="auth-nav-actions">

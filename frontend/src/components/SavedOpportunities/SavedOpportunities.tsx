@@ -180,19 +180,31 @@ function SavedOpportunities() {
                                         <p className="saved-company">{item.company}</p>
                                         <p className="saved-location">{item.location}</p>
                                         <p className="saved-detail">Stipend: {item.stipend || "Not specified"}</p>
+                                        {item.description && (
+                                            <p className="saved-description">{item.description}</p>
+                                        )}
+                                        {item.skills && (
+                                            <p className="saved-detail">Skills: {item.skills}</p>
+                                        )}
 
                                         {item.deadline && (
                                             <p className="saved-deadline">Deadline: {item.deadline}</p>
                                         )}
 
                                         <div className="saved-card-actions">
-                                            <a
-                                                href={item.source_url}
-                                                target="_blank"
-                                                rel="noreferrer"
-                                            >
-                                                View Opportunity
-                                            </a>
+                                            {item.source_url ? (
+                                                <a
+                                                    href={item.source_url}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                >
+                                                    View opportunity
+                                                </a>
+                                            ) : (
+                                                <span className="saved-link-unavailable">
+                                                    Link unavailable
+                                                </span>
+                                            )}
 
                                             <button
                                                 onClick={() =>
@@ -219,6 +231,12 @@ function SavedOpportunities() {
                                         <p className="saved-company">{item.organizer}</p>
                                         <p className="saved-location">{item.location}</p>
                                         <p className="saved-detail">Mode: {item.participation_mode}</p>
+                                        {item.description && (
+                                            <p className="saved-description">{item.description}</p>
+                                        )}
+                                        {item.themes && (
+                                            <p className="saved-detail">Themes: {item.themes}</p>
+                                        )}
 
                                         {item.registration_deadline && (
                                             <p className="saved-deadline">
@@ -228,13 +246,19 @@ function SavedOpportunities() {
                                         )}
 
                                         <div className="saved-card-actions">
-                                            <a
-                                                href={item.source_url}
-                                                target="_blank"
-                                                rel="noreferrer"
-                                            >
-                                                View Opportunity
-                                            </a>
+                                            {item.source_url ? (
+                                                <a
+                                                    href={item.source_url}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                >
+                                                    View hackathon
+                                                </a>
+                                            ) : (
+                                                <span className="saved-link-unavailable">
+                                                    Link unavailable
+                                                </span>
+                                            )}
 
                                             <button
                                                 onClick={() =>

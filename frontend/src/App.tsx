@@ -110,21 +110,63 @@ function App() {
                 isAuthenticated={isAuthenticated}
                 isAdmin={isAdmin}
                 username={username}
+                activePage={page}
                 onNavigate={handleNavigate}
                 onLogout={handleLogout}
             />
 
             <main>
-                {page === "home" && (
+                {page === "home" && isAuthenticated && (
+                    <Recommendations
+                        username={username ?? ""}
+                        onNavigate={handleNavigate}
+                        isDashboard
+                    />
+                )}
+
+                {page === "home" && !isAuthenticated && (
                     <>
-                        <Home />
-                        <Internships isAdmin={isAdmin} />
-                        <Hackathons isAdmin={isAdmin} />
-                        <Verify />
-                        <Intnem />
+                        <Home onNavigate={handleNavigate} />
                         <About />
                     </>
                 )}
+
+                {page === "explore" && (
+                    <>
+                        <Internships
+                            isAdmin={isAdmin}
+                            isAuthenticated={isAuthenticated}
+                            onNavigate={handleNavigate}
+                        />
+                        <Hackathons
+                            isAdmin={isAdmin}
+                            isAuthenticated={isAuthenticated}
+                            onNavigate={handleNavigate}
+                        />
+                    </>
+                )}
+
+                {page === "internships" && (
+                    <Internships
+                        isAdmin={isAdmin}
+                        isAuthenticated={isAuthenticated}
+                        onNavigate={handleNavigate}
+                    />
+                )}
+
+                {page === "hackathons" && (
+                    <Hackathons
+                        isAdmin={isAdmin}
+                        isAuthenticated={isAuthenticated}
+                        onNavigate={handleNavigate}
+                    />
+                )}
+
+                {page === "verify" && <Verify />}
+
+                {page === "assistant" && <Intnem />}
+
+                {page === "about" && <About />}
 
                 {page === "register" && (
                     <Register
@@ -153,11 +195,16 @@ function App() {
                 )}
 
                 {page === "recommendations" && isAuthenticated && (
-                    <Recommendations />
+                    <Recommendations
+                        username={username ?? ""}
+                        onNavigate={handleNavigate}
+                    />
                 )}
             </main>
 
-            {page === "home" && <Footer />}
+            {page !== "login" && page !== "register" && page !== "admin" && (
+                <Footer onNavigate={handleNavigate} />
+            )}
         </div>
     );
 }

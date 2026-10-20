@@ -7,6 +7,7 @@ export interface Hackathon {
   skills: string[];
   prize: string;
   deadline: string;
+  description?: string;
   source_url?: string;
 }
 
@@ -14,6 +15,7 @@ export interface HackathonCardProps {
   hackathon: Hackathon;
   saved: boolean;
   onToggleSave: (id: number) => void;
+  canSave?: boolean;
 }
 
 export interface HackathonFiltersProps {
@@ -23,4 +25,8 @@ export interface HackathonFiltersProps {
   onSearchChange: (value: string) => void;
   onLocationChange: (value: string) => void;
   onTypeChange: (value: string) => void;
+  locations: string[];
+  types: string[];
+  sortBy: "recommended" | "deadline" | "title";
+  onSortChange: (value: "recommended" | "deadline" | "title") => void;
 }

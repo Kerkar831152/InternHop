@@ -1,82 +1,65 @@
-function Home() {
+import type { Page } from "../../types/navigation";
+
+interface HomeProps {
+  onNavigate: (page: Page) => void;
+}
+
+function Home({ onNavigate }: HomeProps) {
   return (
     <section className="hero-section" id="home">
-      <div className="hero-grid"></div>
-
-      <div className="hero-glow hero-glow-one"></div>
-      <div className="hero-glow hero-glow-two"></div>
-
       <div className="hero-content">
         <div className="hero-label">
           <span className="live-dot"></span>
-          OPPORTUNITIES, WITHOUT THE NOISE
+          YOUR NEXT STEP STARTS HERE
         </div>
 
         <h1>
-          Find opportunities
+          Discover opportunities
           <br />
-          <span>worth your time.</span>
+          <span>built around you.</span>
         </h1>
 
         <p>
-          Discover internships and hackathons matched to your skills,
-          interests, and preferences — all in one focused platform.
+          Explore internships and hackathons, save the ones you like, and get
+          recommendations informed by your skills and preferences.
         </p>
 
         <div className="hero-actions">
-          <a href="#internships" className="primary-button">
-            Explore Internships
-            <span>→</span>
-          </a>
-
-          <a href="#hackathons" className="secondary-button">
-            Explore Hackathons
-          </a>
-        </div>
-
-        <div className="hero-trust">
-          <div className="avatar-stack">
-            <span>V</span>
-            <span>A</span>
-            <span>R</span>
-          </div>
-
-          <div>
-            <strong>Built for ambitious students</strong>
-            <p>Discover • Verify • Build</p>
-          </div>
+          <button
+            type="button"
+            className="primary-button"
+            onClick={() => onNavigate("explore")}
+          >
+            Explore opportunities <span aria-hidden="true">→</span>
+          </button>
+          <button
+            type="button"
+            className="secondary-button"
+            onClick={() => onNavigate("verify")}
+          >
+            Check an image
+          </button>
         </div>
       </div>
 
       <div className="hero-visual">
-        <div className="visual-orbit orbit-one"></div>
-        <div className="visual-orbit orbit-two"></div>
-        <div className="visual-orbit orbit-three"></div>
-
-        <div className="visual-core">
-          <div className="core-symbol">✦</div>
-        </div>
-
-        <div className="floating-card floating-card-one">
-          <span className="mini-logo">T</span>
-
-          <div>
-            <strong>Frontend Intern</strong>
-            <small>TechNova · Remote</small>
+        <div className="home-feature-panel">
+          <span className="home-feature-eyebrow">A clearer way to discover</span>
+          <h2>Find the right opportunity, at your own pace.</h2>
+          <div className="home-feature-list">
+            <div>
+              <span aria-hidden="true">01</span>
+              <p><strong>Explore</strong> internships and hackathons in one place.</p>
+            </div>
+            <div>
+              <span aria-hidden="true">02</span>
+              <p><strong>Personalize</strong> recommendations with your profile.</p>
+            </div>
+            <div>
+              <span aria-hidden="true">03</span>
+              <p><strong>Keep track</strong> of opportunities you save.</p>
+            </div>
           </div>
-
-          <span className="match-score">94%</span>
-        </div>
-
-        <div className="floating-card floating-card-two">
-          <span className="mini-logo purple">AI</span>
-
-          <div>
-            <strong>AI for Good</strong>
-            <small>Hackathon · Online</small>
-          </div>
-
-          <span className="verified-mark">✓</span>
         </div>
       </div>
     </section>
