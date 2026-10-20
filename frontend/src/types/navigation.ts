@@ -10,7 +10,6 @@ export type Page =
     | "internships"
     | "hackathons"
     | "verify"
-    | "assistant"
     | "about";
 
 export interface NavbarProps {

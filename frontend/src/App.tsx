@@ -9,7 +9,6 @@ import Home from "./components/Home/Home";
 import Internships from "./components/Internships/Internships";
 import Hackathons from "./components/Hackathons/Hackathons";
 import Verify from "./components/Verify/Verify";
-import Intnem from "./components/Intnem/Intnem";
 import About from "./components/About/About";
 import Footer from "./components/Footer/Footer";
 
@@ -141,7 +140,6 @@ function App() {
                         <Hackathons
                             isAdmin={isAdmin}
                             isAuthenticated={isAuthenticated}
-                            onNavigate={handleNavigate}
                         />
                     </>
                 )}
@@ -158,13 +156,10 @@ function App() {
                     <Hackathons
                         isAdmin={isAdmin}
                         isAuthenticated={isAuthenticated}
-                        onNavigate={handleNavigate}
                     />
                 )}
 
                 {page === "verify" && <Verify />}
-
-                {page === "assistant" && <Intnem />}
 
                 {page === "about" && <About />}
 

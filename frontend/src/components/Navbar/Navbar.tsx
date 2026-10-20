@@ -34,7 +34,6 @@ function Navbar({
                     ["internships", "Internships"],
                     ["hackathons", "Hackathons"],
                     ["verify", "Image check"],
-                    ["assistant", "Ask Intnem"],
                     ["about", "About"],
                 ] as const).map(([page, label]) => (
                     <button

@@ -8,16 +8,13 @@ import {
 } from "../../api";
 import HackathonCard from "./HackathonCard";
 import HackathonFilters from "./HackathonFilters";
-import type { Page } from "../../types/navigation";
-
 
 interface HackathonsProps {
   isAdmin: boolean;
   isAuthenticated: boolean;
-  onNavigate: (page: Page) => void;
 }
 
-function Hackathons({ isAdmin, isAuthenticated, onNavigate }: HackathonsProps) {
+function Hackathons({ isAdmin, isAuthenticated }: HackathonsProps) {
   const [search, setSearch] = useState("");
   const [location, setLocation] = useState("");
   const [type, setType] = useState("");
@@ -205,14 +202,6 @@ function Hackathons({ isAdmin, isAuthenticated, onNavigate }: HackathonsProps) {
               worth your weekend.
             </p>
           </div>
-
-          <button
-            type="button"
-            className="section-link"
-            onClick={() => onNavigate("assistant")}
-          >
-            Ask Intnem →
-          </button>
         </div>
 
         <HackathonFilters

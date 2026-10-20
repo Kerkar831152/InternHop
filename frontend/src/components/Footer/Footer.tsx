@@ -32,7 +32,6 @@ function Footer({ onNavigate }: FooterProps) {
           <button type="button" onClick={() => onNavigate("internships")}>Internships</button>
           <button type="button" onClick={() => onNavigate("hackathons")}>Hackathons</button>
           <button type="button" onClick={() => onNavigate("verify")}>Image check</button>
-          <button type="button" onClick={() => onNavigate("assistant")}>Ask Intnem</button>
           <button type="button" onClick={() => onNavigate("about")}>About</button>
         </div>
 
