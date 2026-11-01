@@ -1,5 +1,7 @@
+
 import json
 import os
+import time
 
 from google import genai
 from google.genai import types
@@ -54,22 +56,33 @@ def scan_opportunity_image(image_bytes, mime_type):
     it looks professional.
     """
 
-    response = client.models.generate_content(
-        model=os.getenv("GEMINI_MODEL", "gemini-2.5-flash"),
-        contents=[
-            prompt,
-            types.Part.from_bytes(
-                data=image_bytes,
-                mime_type=mime_type,
-            ),
-        ],
-        config=types.GenerateContentConfig(
-            response_mime_type="application/json",
-            temperature=0.1,
-        ),
-    )
+    response = None
 
-    if not response.text:
+    for attempt in range(3):
+        try:
+            response = client.models.generate_content(
+                model=os.getenv("GEMINI_MODEL", "gemini-3.8-flash"),
+                contents=[
+                    prompt,
+                    types.Part.from_bytes(
+                        data=image_bytes,
+                        mime_type=mime_type,
+                    ),
+                ],
+                config=types.GenerateContentConfig(
+                    response_mime_type="application/json",
+                    temperature=0.1,
+                ),
+            )
+            break
+
+        except Exception:
+            if attempt == 2:
+                raise
+
+            time.sleep(3)
+
+    if not response or not response.text:
         raise ValueError("Gemini returned an empty response.")
 
     try:
