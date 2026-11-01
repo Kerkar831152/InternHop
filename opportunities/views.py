@@ -17,7 +17,8 @@ from opportunities.services.persistence import (
     save_internships,
     save_hackathons,
 )
-
+from rest_framework.parsers import MultiPartParser, FormParser
+from opportunities.services.image_scanner import scan_opportunity_image
 
 class DiscoverOpportunitiesView(APIView):
     permission_classes = [IsAdminUser]
@@ -99,3 +100,58 @@ class RecommendationsView(APIView):
             "internships": internships,
             "hackathons": hackathons,
         })
+
+
+class ScanOpportunityImageView(APIView):
+    parser_classes = [MultiPartParser, FormParser]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        image = request.FILES.get("image")
+
+        if not image:
+            return Response(
+                {"error": "Please upload an image."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if not image.content_type or not image.content_type.startswith("image/"):
+            return Response(
+                {"error": "Only image files are supported."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if image.size > 10 * 1024 * 1024:
+            return Response(
+                {"error": "Image size must be below 10 MB."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            result = scan_opportunity_image(
+                image_bytes=image.read(),
+                mime_type=image.content_type,
+            )
+
+            return Response(
+                {
+                    "message": "Image analysed successfully.",
+                    "result": result,
+                },
+                status=status.HTTP_200_OK,
+            )
+
+        except ValueError as exc:
+            return Response(
+                {"error": str(exc)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        except Exception:
+            import logging
+            logging.exception("Gemini image scanning failed.")
+
+            return Response(
+                {"error": "Image analysis failed. Check the Django terminal."},
+                status=status.HTTP_502_BAD_GATEWAY,
+            )
